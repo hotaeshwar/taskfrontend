@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faLock, faKey, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
@@ -13,6 +13,7 @@ const ForgotPassword = () => {
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [tokenData, setTokenData] = useState(null);
+  const navigate = useNavigate();
 
   const handleRequestToken = async (e) => {
     e.preventDefault();
@@ -20,7 +21,7 @@ const ForgotPassword = () => {
     setError('');
 
     try {
-      const response = await fetch( 'https://task.trizenttechserve.in/password-reset-request', {
+      const response = await fetch( 'https://taskapi.buildingindiadigital.com/password-reset-request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -57,7 +58,7 @@ const ForgotPassword = () => {
     setError('');
 
     try {
-      const response = await fetch('https://task.trizenttechserve.in/reset-password', {
+      const response = await fetch('https://taskapi.buildingindiadigital.com/reset-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -257,7 +258,11 @@ const ForgotPassword = () => {
         <div className="text-center mt-6">
           <Link 
             to="/" 
-            className="inline-flex items-center text-indigo-600 hover:text-indigo-800 font-medium transition-colors duration-300 hover:underline"
+            className="inline-flex items-center text-indigo-600 hover:text-indigo-800 font-medium transition-colors duration-300 hover:underline cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/');
+            }}
           >
             <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
             Back to Login

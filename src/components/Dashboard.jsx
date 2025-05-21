@@ -115,7 +115,7 @@ const Dashboard = ({ userData, onLogout }) => {
         throw new Error('Authentication token not found. Please login again.');
       }
 
-      const response = await fetch('https://task.trizenttechserve.in/allocators/employee-approval', {
+      const response = await fetch('https://taskapi.buildingindiadigital.com/allocators/employee-approval', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +135,7 @@ const Dashboard = ({ userData, onLogout }) => {
       const data = await response.json();
       console.log(`Employee ${action}d successfully:`, data);
       
-      const pendingResponse = await fetch('https://task.trizenttechserve.in/allocators/pending-approvals', {
+      const pendingResponse = await fetch('https://taskapi.buildingindiadigital.com/allocators/pending-approvals', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -158,7 +158,7 @@ const Dashboard = ({ userData, onLogout }) => {
   // Function to fetch all employees for allocator
   const fetchEmployees = async () => {
     try {
-      const response = await fetch('https://task.trizenttechserve.in/employees', {
+      const response = await fetch('https://taskapi.buildingindiadigital.com/employees', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -178,7 +178,7 @@ const Dashboard = ({ userData, onLogout }) => {
   // Function for allocator to view employee timesheets
   const fetchEmployeeTimesheets = async (employeeId, startDate = null, endDate = null) => {
     try {
-      let url =  `https://task.trizenttechserve.in/allocators/employee/${employeeId}/timesheets`;
+      let url =  `https://taskapi.buildingindiadigital.com/allocators/employee/${employeeId}/timesheets`;
       const params = new URLSearchParams();
       
       if (startDate) params.append('start_date', startDate);
@@ -218,7 +218,7 @@ const Dashboard = ({ userData, onLogout }) => {
     setIsDeleting(true);
     try {
       // FIXED: Pass before_date as a query parameter
-      const response = await fetch( `https://task.trizenttechserve.in/allocators/employee/${employeeId}/timesheets?before_date=${beforeDate}`, {
+      const response = await fetch( `https://taskapi.buildingindiadigital.com/allocators/employee/${employeeId}/timesheets?before_date=${beforeDate}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -256,7 +256,7 @@ const Dashboard = ({ userData, onLogout }) => {
     setIsDeleting(true);
     try {
       // Make the DELETE request with the date as a query parameter
-      const response = await fetch( `https://task.trizenttechserve.in/employees/timesheets?before_date=${beforeDate}`, {
+      const response = await fetch( `https://taskapi.buildingindiadigital.com/employees/timesheets?before_date=${beforeDate}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -330,7 +330,7 @@ const Dashboard = ({ userData, onLogout }) => {
   // Transform API data to match the expected format in your UI
   const fetchPayrollRecords = async () => {
     try {
-      const response = await fetch('https://task.trizenttechserve.in/employees/payroll', {
+      const response = await fetch('https://taskapi.buildingindiadigital.com/employees/payroll', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -386,7 +386,7 @@ const Dashboard = ({ userData, onLogout }) => {
 
   const fetchPayrollDetail = async (periodId) => {
     try {
-      const response = await fetch(`https://task.trizenttechserve.in/employees/payroll/${periodId}`, {
+      const response = await fetch(`https://taskapi.buildingindiadigital.com/employees/payroll/${periodId}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -427,7 +427,7 @@ const Dashboard = ({ userData, onLogout }) => {
 
   const fetchTimesheetData = async (startDate = null, endDate = null) => {
     try {
-      let url = 'https://task.trizenttechserve.in/employees/timesheets';
+      let url = 'https://taskapi.buildingindiadigital.com/employees/timesheets';
       const params = new URLSearchParams();
       
       if (startDate) params.append('start_date', startDate);
@@ -471,8 +471,8 @@ const Dashboard = ({ userData, onLogout }) => {
 
     try {
       const endpoint = userData.role === 'allocator'
-        ? 'https://task.trizenttechserve.in/allocators/dashboard'
-        : 'https://task.trizenttechserve.in/employees/dashboard'
+        ? 'https://taskapi.buildingindiadigital.com/allocators/dashboard'
+        : 'https://taskapi.buildingindiadigital.com/employees/dashboard'
 ;
 
       const response = await fetch(endpoint, {
@@ -495,7 +495,7 @@ const Dashboard = ({ userData, onLogout }) => {
 
       if (userData.role === 'allocator') {
         try {
-          const approvalsResponse = await fetch('https://task.trizenttechserve.in/allocators/pending-approvals', {
+          const approvalsResponse = await fetch('https://taskapi.buildingindiadigital.com/allocators/pending-approvals', {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('token')}`
             }

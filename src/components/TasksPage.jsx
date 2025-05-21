@@ -63,7 +63,7 @@ const TasksPage = ({ userData, onLogout }) => {
     setError('');
     
     try {
-      const response = await fetch('https://task.trizenttechserve.in/tasks', {
+      const response = await fetch('https://taskapi.buildingindiadigital.com/tasks', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -90,7 +90,7 @@ const TasksPage = ({ userData, onLogout }) => {
     
     try {
       // Fetch clients
-      const clientsResponse = await fetch('https://task.trizenttechserve.in/clients', {
+      const clientsResponse = await fetch('https://taskapi.buildingindiadigital.com/clients', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -104,7 +104,7 @@ const TasksPage = ({ userData, onLogout }) => {
       setClients(clientsData);
 
       // Fetch employees
-      const employeesResponse = await fetch('https://task.trizenttechserve.in/employees', {
+      const employeesResponse = await fetch('https://taskapi.buildingindiadigital.com/employees', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -178,7 +178,7 @@ const TasksPage = ({ userData, onLogout }) => {
     e.preventDefault();
     
     try {
-      const response = await fetch(`https://task.trizenttechserve.in/tasks/${selectedTask.id}/report`, {
+      const response = await fetch(`https://taskapi.buildingindiadigital.com/tasks/${selectedTask.id}/report`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -212,7 +212,7 @@ const TasksPage = ({ userData, onLogout }) => {
     e.preventDefault();
     
     try {
-      const response = await fetch(`https://task.trizenttechserve.in/tasks/${selectedTask.id}/status`, {
+      const response = await fetch(`https://taskapi.buildingindiadigital.com/tasks/${selectedTask.id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -244,7 +244,7 @@ const TasksPage = ({ userData, onLogout }) => {
     e.preventDefault();
     
     try {
-      const response = await fetch('https://task.trizenttechserve.in/tasks', {
+      const response = await fetch('https://taskapi.buildingindiadigital.com/tasks', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

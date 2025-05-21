@@ -58,7 +58,7 @@ const RegisterPage = () => {
     }
 
     try {
-      const response = await fetch('https://task.trizenttechserve.in/register', {
+      const response = await fetch('https://taskapi.buildingindiadigital.com/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -282,7 +282,7 @@ const RegisterPage = () => {
             </button>
           </div>
 
-          {/* Login Link - FIXED */}
+          {/* Login Link */}
           <div className="text-center mt-6">
             <p className="text-gray-600">
               Already have an account?{' '}

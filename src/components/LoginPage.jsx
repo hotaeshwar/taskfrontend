@@ -51,7 +51,7 @@ const LoginPage = ({ onLogin }) => {
     }
 
     try {
-      const response = await fetch('https://task.trizenttechserve.in/login', {
+      const response = await fetch('https://taskapi.buildingindiadigital.com/login', {
         method: 'POST',
         body: formData
       });
@@ -72,7 +72,7 @@ const LoginPage = ({ onLogin }) => {
       const token = data.access_token;
 
       // Fetch user data
-      const userResponse = await fetch('https://task.trizenttechserve.in/users/me', {
+      const userResponse = await fetch('https://taskapi.buildingindiadigital.com/users/me', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -113,7 +113,7 @@ const LoginPage = ({ onLogin }) => {
   // Fetch count of pending approval requests
   const fetchPendingApprovalCount = async (token) => {
     try {
-      const response = await fetch('https://task.trizenttechserve.in/allocators/pending-approvals', {
+      const response = await fetch('https://taskapi.buildingindiadigital.com/pending-approvals', {
         headers: {
           'Authorization': `Bearer ${token || allocatorToken}`
         }
@@ -138,7 +138,7 @@ const LoginPage = ({ onLogin }) => {
     setApprovalError('');
     
     try {
-      const response = await fetch('https://task.trizenttechserve.in/allocators/pending-approvals', {
+      const response = await fetch('https://taskapi.buildingindiadigital.com/allocators/pending-approvals', {
         headers: {
           'Authorization': `Bearer ${allocatorToken}`
         }
@@ -162,7 +162,7 @@ const LoginPage = ({ onLogin }) => {
   // Handle approval/rejection of employee requests
   const handleApprovalAction = async (employeeId, action) => {
     try {
-      const response = await fetch('https://task.trizenttechserve.in/allocators/employee-approval', {
+      const response = await fetch('https://taskapi.buildingindiadigital.com/allocators/employee-approval', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${allocatorToken}`,
@@ -440,14 +440,22 @@ const LoginPage = ({ onLogin }) => {
           <div className="flex items-center justify-between pt-2">
             <Link 
               to="/forgot-password" 
-              className="text-sm text-indigo-600 hover:text-indigo-800 transition-colors duration-300 hover:underline"
+              className="text-sm text-indigo-600 hover:text-indigo-800 transition-colors duration-300 hover:underline cursor-pointer"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/forgot-password');
+              }}
             >
               Forgot Password?
             </Link>
             
             <Link 
               to="/register" 
-              className="text-sm text-indigo-600 hover:text-indigo-800 transition-colors duration-300 hover:underline"
+              className="text-sm text-indigo-600 hover:text-indigo-800 transition-colors duration-300 hover:underline cursor-pointer"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/register');
+              }}
             >
               Create Account
             </Link>

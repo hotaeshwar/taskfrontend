@@ -81,7 +81,7 @@ const Sidebar = ({ userData, onLogout, isSidebarOpen, toggleSidebar }) => {
     setSyncLoading(true);
     setErrorMsg(null);
     try {
-      const response = await fetch( 'https://task.trizenttechserve.in/employees/work-session/status', {
+      const response = await fetch( 'https://taskapi.buildingindiadigital.com/employees/work-session/status', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -124,7 +124,7 @@ const Sidebar = ({ userData, onLogout, isSidebarOpen, toggleSidebar }) => {
         return;
       }
       
-      const response = await fetch('https://task.trizenttechserve.in/employees/clock-in', {
+      const response = await fetch('https://taskapi.buildingindiadigital.com/employees/clock-in', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -177,7 +177,7 @@ const Sidebar = ({ userData, onLogout, isSidebarOpen, toggleSidebar }) => {
         return;
       }
       
-      const response = await fetch( 'https://task.trizenttechserve.in/employees/clock-out', {
+      const response = await fetch( 'https://taskapi.buildingindiadigital.com/employees/clock-out', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

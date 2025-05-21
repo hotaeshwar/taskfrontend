@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useNavigate } from 'react-router-dom';
 
 // API base URL - update this to match your backend
-const API_BASE_URL = 'https://task.trizenttechserve.in';
+const API_BASE_URL = 'https://taskapi.buildingindiadigital.com';
 
 const Payroll = () => {
   const navigate = useNavigate();

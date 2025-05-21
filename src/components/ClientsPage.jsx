@@ -34,7 +34,7 @@ const ClientsPage = ({ userData, onLogout }) => {
     setError('');
     
     try {
-      const response = await fetch('https://task.trizenttechserve.in/clients', {
+      const response = await fetch('https://taskapi.buildingindiadigital.com/clients', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -59,7 +59,7 @@ const ClientsPage = ({ userData, onLogout }) => {
     setIsLoadingTasks(true);
     
     try {
-      const response = await fetch(`'https://task.trizenttechserve.in/tasks/client/${clientId}'`, {
+      const response = await fetch(`'https://taskapi.buildingindiadigital.com/tasks/client/${clientId}'`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

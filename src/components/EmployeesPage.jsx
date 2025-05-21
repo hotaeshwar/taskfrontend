@@ -47,7 +47,7 @@ const EmployeesPage = ({ userData, onLogout }) => {
     setError('');
     
     try {
-      const response = await fetch('https://task.trizenttechserve.in/employees', {
+      const response = await fetch('https://taskapi.buildingindiadigital.com/employees', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -72,7 +72,7 @@ const EmployeesPage = ({ userData, onLogout }) => {
     setIsLoadingTasks(true);
     
     try {
-      const response = await fetch(`https://task.trizenttechserve.in/tasks?employee_id=${employeeId}`, {
+      const response = await fetch(`https://taskapi.buildingindiadigital.com/tasks?employee_id=${employeeId}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -95,7 +95,7 @@ const EmployeesPage = ({ userData, onLogout }) => {
     try {
       // Changed from GET to GET from employee's salary-history endpoint
       // This is the correct endpoint according to the FastAPI code
-      const response = await fetch( `https://task.trizenttechserve.in/employees/${employeeId}/salary-history`, {
+      const response = await fetch( `https://taskapi.buildingindiadigital.com/employees/${employeeId}/salary-history`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -134,7 +134,7 @@ const EmployeesPage = ({ userData, onLogout }) => {
       
       // Use the allocators endpoint instead as that's what the backend has implemented
       const response = await fetch(
-        `https://task.trizenttechserve.in/allocators/employee/${employeeId}/work-sessions?` +
+        `https://taskapi.buildingindiadigital.com/${employeeId}/work-sessions?` +
         `start_date=${firstDay.toISOString().split('T')[0]}&end_date=${lastDay.toISOString().split('T')[0]}`,
         {
           headers: {
@@ -221,7 +221,7 @@ const EmployeesPage = ({ userData, onLogout }) => {
       };
 
       const response = await fetch(
-       `https://task.trizenttechserve.in/employees/${selectedEmployee.id}/salary`,
+       `https://taskapi.buildingindiadigital.com/${selectedEmployee.id}/salary`,
         {
           method: 'POST',
           headers: {
