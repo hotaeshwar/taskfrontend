@@ -205,49 +205,48 @@ const EmployeesPage = ({ userData, onLogout }) => {
   };
 
   const handleSetSalary = async () => {
-    if (!selectedEmployee) return;
-    
-    try {
-      const monthlySalary = parseFloat(salaryFormData.monthly_salary);
-      if (isNaN(monthlySalary) || monthlySalary <= 0) {
-        throw new Error('Please enter a valid salary amount');
-      }
-
-      // Create the proper payload according to API requirements
-      const payload = {
-        employee_id: selectedEmployee.id,
-        monthly_salary: monthlySalary,
-        currency: salaryFormData.currency
-      };
-
-      const response = await fetch(
-       `https://taskapi.buildingindiadigital.com/${selectedEmployee.id}/salary`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify(payload)
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to set salary');
-      }
-
-      const data = await response.json();
-      setEmployeeSalary(data);
-      setShowSalaryForm(false);
-      // Recalculate earnings with new salary
-      await calculateCurrentMonthEarnings(selectedEmployee.id);
-    } catch (error) {
-      console.error('Error setting salary:', error);
-      setError(error.message || 'Failed to set salary. Please try again.');
+  if (!selectedEmployee) return;
+  
+  try {
+    const monthlySalary = parseFloat(salaryFormData.monthly_salary);
+    if (isNaN(monthlySalary) || monthlySalary <= 0) {
+      throw new Error('Please enter a valid salary amount');
     }
-  };
 
+    // Create the proper payload according to API requirements
+    const payload = {
+      employee_id: selectedEmployee.id,
+      monthly_salary: monthlySalary,
+      currency: salaryFormData.currency
+    };
+
+    const response = await fetch(
+      `https://taskapi.buildingindiadigital.com/employees/${selectedEmployee.id}/salary`, // FIXED: Added "employees/" prefix
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(payload)
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Failed to set salary');
+    }
+
+    const data = await response.json();
+    setEmployeeSalary(data);
+    setShowSalaryForm(false);
+    // Recalculate earnings with new salary
+    await calculateCurrentMonthEarnings(selectedEmployee.id);
+  } catch (error) {
+    console.error('Error setting salary:', error);
+    setError(error.message || 'Failed to set salary. Please try again.');
+  }
+};
   useEffect(() => {
     fetchEmployees();
   }, []);

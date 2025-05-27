@@ -17,7 +17,7 @@ const RegisterPage = () => {
     email: '',
     password: '',
     confirm_password: '',
-    role: 'employee'
+    role: ''
   });
   
   const [error, setError] = useState('');
@@ -100,8 +100,13 @@ const RegisterPage = () => {
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
         
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
-            BID Task Allocator
+          <h1 className="text-3xl font-bold">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-500 via-white to-green-600" style={{WebkitTextStroke: '1px #333'}}>
+              Bid
+            </span>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 ml-1">
+              Task Allocator
+            </span>
           </h1>
           <p className="text-gray-600 mt-2 font-medium">Create your account to get started</p>
         </div>
@@ -282,17 +287,13 @@ const RegisterPage = () => {
             </button>
           </div>
 
-          {/* Login Link */}
+          {/* Login Link - Updated to be a normal Link */}
           <div className="text-center mt-6">
             <p className="text-gray-600">
               Already have an account?{' '}
               <Link 
                 to="/" 
-                className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors duration-300 hover:underline cursor-pointer"
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate('/');
-                }}
+                className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors duration-300 hover:underline"
               >
                 Sign In
               </Link>
