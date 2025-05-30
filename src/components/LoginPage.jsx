@@ -14,6 +14,7 @@ import {
   faEye,
   faEyeSlash
 } from '@fortawesome/free-solid-svg-icons';
+import illustrationImage from '../assets/images/illustration.png';
 
 const LoginPage = ({ onLogin }) => {
   // Login states
@@ -203,7 +204,7 @@ const LoginPage = ({ onLogin }) => {
         <div className="fixed top-4 right-4 sm:top-6 sm:right-6 lg:top-8 lg:right-8 z-20">
           <button
             onClick={openApprovalModal}
-            className="bg-white p-2 sm:p-3 rounded-full shadow-lg text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-300 relative hover:shadow-xl transform hover:-translate-y-1"
+            className="bg-slate-800 p-2 sm:p-3 rounded-full shadow-lg text-purple-400 hover:text-purple-300 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300 relative hover:shadow-xl transform hover:-translate-y-1"
             aria-label="Pending Approval Notifications"
           >
             <FontAwesomeIcon icon={faBell} className="text-base sm:text-lg md:text-xl" />
@@ -223,51 +224,51 @@ const LoginPage = ({ onLogin }) => {
 
     return (
       <div className="fixed inset-0 bg-gray-900 bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
-        <div className="bg-white rounded-xl p-4 sm:p-5 md:p-6 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl max-h-[85vh] sm:max-h-[80vh] overflow-y-auto shadow-2xl border border-indigo-100">
+        <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 sm:p-5 md:p-6 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl max-h-[85vh] sm:max-h-[80vh] overflow-y-auto shadow-2xl">
           <div className="flex justify-between items-center mb-4 sm:mb-5">
-            <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-800 flex items-center">
-              <FontAwesomeIcon icon={faBell} className="mr-2 sm:mr-3 text-indigo-500 text-sm sm:text-base" />
+            <h2 className="text-base sm:text-lg md:text-xl font-bold text-white flex items-center">
+              <FontAwesomeIcon icon={faBell} className="mr-2 sm:mr-3 text-purple-400 text-sm sm:text-base" />
               <span className="hidden sm:inline">Pending Approvals</span>
               <span className="sm:hidden">Approvals</span>
             </h2>
             <button 
               onClick={() => setShowApprovalModal(false)}
-              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1.5 sm:p-2 rounded-full transition-colors duration-300 transform hover:rotate-90"
+              className="text-slate-400 hover:text-white hover:bg-slate-700 p-1.5 sm:p-2 rounded-full transition-colors duration-300 transform hover:rotate-90"
             >
               <FontAwesomeIcon icon={faTimes} className="text-sm sm:text-base" />
             </button>
           </div>
 
           {approvalError && (
-            <div className="bg-rose-50 border-l-4 border-rose-500 text-rose-700 p-3 sm:p-4 rounded-lg mb-3 sm:mb-4">
+            <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-3 sm:p-4 rounded-lg mb-3 sm:mb-4">
               <p className="text-xs sm:text-sm">{approvalError}</p>
             </div>
           )}
 
           {approvalLoading ? (
             <div className="flex justify-center py-8 sm:py-10">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : pendingApprovals.length === 0 ? (
-            <div className="text-center py-8 sm:py-10 text-gray-500">
+            <div className="text-center py-8 sm:py-10 text-slate-400">
               <p className="text-sm sm:text-base">No pending approval requests</p>
             </div>
           ) : (
             <div className="space-y-3 sm:space-y-4">
               {pendingApprovals.map((approval) => (
-                <div key={approval.request_id} className="border border-gray-100 rounded-xl p-3 sm:p-4 hover:shadow-lg transition-all duration-300 bg-white hover:bg-indigo-50">
+                <div key={approval.request_id} className="border border-slate-600 rounded-xl p-3 sm:p-4 hover:shadow-lg transition-all duration-300 bg-slate-700 hover:bg-slate-600">
                   <div className="space-y-1.5 sm:space-y-2 mb-3">
                     <div className="flex flex-col sm:flex-row sm:items-center">
-                      <span className="font-medium text-gray-500 text-xs sm:text-sm sm:w-24 mb-1 sm:mb-0">Username:</span> 
-                      <span className="font-semibold text-gray-800 text-sm sm:text-base break-all">{approval.employee_username}</span>
+                      <span className="font-medium text-slate-400 text-xs sm:text-sm sm:w-24 mb-1 sm:mb-0">Username:</span> 
+                      <span className="font-semibold text-white text-sm sm:text-base break-all">{approval.employee_username}</span>
                     </div>
                     <div className="flex flex-col sm:flex-row sm:items-center">
-                      <span className="font-medium text-gray-500 text-xs sm:text-sm sm:w-24 mb-1 sm:mb-0">Email:</span> 
-                      <span className="text-gray-800 text-sm break-all">{approval.employee_email}</span>
+                      <span className="font-medium text-slate-400 text-xs sm:text-sm sm:w-24 mb-1 sm:mb-0">Email:</span> 
+                      <span className="text-white text-sm break-all">{approval.employee_email}</span>
                     </div>
                     <div className="flex flex-col sm:flex-row sm:items-center">
-                      <span className="font-medium text-gray-500 text-xs sm:text-sm sm:w-24 mb-1 sm:mb-0">Requested:</span> 
-                      <span className="text-gray-600 text-xs sm:text-sm">{new Date(approval.requested_at).toLocaleString()}</span>
+                      <span className="font-medium text-slate-400 text-xs sm:text-sm sm:w-24 mb-1 sm:mb-0">Requested:</span> 
+                      <span className="text-slate-300 text-xs sm:text-sm">{new Date(approval.requested_at).toLocaleString()}</span>
                     </div>
                   </div>
                   <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 mt-3 sm:mt-4">
@@ -294,7 +295,7 @@ const LoginPage = ({ onLogin }) => {
           <div className="mt-4 sm:mt-5 flex justify-end">
             <button
               onClick={() => setShowApprovalModal(false)}
-              className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 sm:px-5 rounded-lg transition-all duration-300 transform hover:scale-105 text-sm sm:text-base"
+              className="bg-slate-600 hover:bg-slate-500 text-white font-medium py-2 px-4 sm:px-5 rounded-lg transition-all duration-300 transform hover:scale-105 text-sm sm:text-base"
             >
               Close
             </button>
@@ -305,13 +306,9 @@ const LoginPage = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 relative p-3 sm:p-4 lg:p-6 overflow-hidden">
-      {/* Background decorative elements */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
-        <div className="absolute top-1/4 left-1/4 w-48 h-48 sm:w-64 sm:h-64 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-        <div className="absolute top-1/3 right-1/4 w-60 h-60 sm:w-80 sm:h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-1/4 right-1/3 w-54 h-54 sm:w-72 sm:h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex flex-col items-center justify-center p-4">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-700/20 via-slate-900/50 to-slate-900"></div>
       
       {/* Notification bell for allocators */}
       {renderApprovalNotification()}
@@ -319,149 +316,181 @@ const LoginPage = ({ onLogin }) => {
       {/* Approval modal */}
       {renderApprovalModal()}
       
-      <div className="bg-white bg-opacity-90 backdrop-blur-lg p-6 sm:p-8 lg:p-10 rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md lg:max-w-lg z-10 border border-gray-100 relative overflow-hidden transition-all duration-500 hover:shadow-indigo-200">
-        {/* Decorative top accent */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
-        
-        <div className="text-center mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight">
-            <span style={{ color: '#FF9933' }}>B</span>
-            <span style={{ color: '#FFFFFF', textShadow: '1px 1px 2px rgba(0,0,0,0.3)' }}>i</span>
-            <span style={{ color: '#138808' }}>d</span>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600"> Task Allocator</span>
-          </h1>
-          <p className="text-gray-600 mt-2 font-medium text-sm sm:text-base">Sign in to your dashboard</p>
-        </div>
+      {/* Bid Task Allocator Heading */}
+      <div className="relative z-10 text-center mb-6">
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+          <span style={{ color: '#FF6600' }}>B</span>
+          <span style={{ color: '#1E3A8A' }}>i</span>
+          <span style={{ color: '#22C55E' }}>d</span>
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400 ml-1">
+            Task Allocator
+          </span>
+        </h1>
+      </div>
 
-        {error && (
-          <div className={`border px-3 sm:px-4 py-3 rounded-lg mb-4 sm:mb-6 ${approvalPending ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-rose-50 border-rose-200 text-rose-700'}`}>
-            {approvalPending ? (
-              <div className="flex items-start">
-                <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2 mt-1 text-amber-500 text-sm flex-shrink-0" />
-                <div>
-                  <p className="text-xs sm:text-sm">{error}</p>
-                  <p className="text-xs mt-1 text-amber-600">An allocator will review your request soon.</p>
-                </div>
+      {/* Main Container */}
+      <div className="relative z-10 w-full max-w-4xl mx-auto">
+        <div className="bg-slate-800/80 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-slate-700/50">
+          <div className="flex flex-col lg:flex-row min-h-[450px]">
+            
+            {/* Left Side - Illustration */}
+            <div className="lg:w-1/2 bg-gradient-to-br from-purple-600 to-blue-700 p-6 lg:p-8 flex flex-col justify-center items-center relative overflow-hidden">
+              {/* Background decoration */}
+              <div className="absolute inset-0 bg-[url(data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E)] opacity-30"></div>
+              
+              {/* Illustration Image */}
+              <div className="relative z-10 w-full max-w-xs mx-auto mb-6">
+                <img 
+                  src={illustrationImage} 
+                  alt="Login Illustration" 
+                  className="w-full h-auto object-contain drop-shadow-2xl"
+                />
               </div>
-            ) : (
-              <div className="flex items-center">
-                <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2 text-rose-500 text-sm flex-shrink-0" />
-                <span className="text-xs sm:text-sm">{error}</span>
-              </div>
-            )}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-          <div className="group">
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-indigo-400 group-hover:text-indigo-600 transition-colors duration-300">
-                <FontAwesomeIcon icon={faUser} className="text-sm sm:text-base" />
-              </span>
-              <input
-                id="username"
-                type="text"
-                className="block w-full px-9 sm:px-10 py-2.5 sm:py-3 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:border-indigo-400 focus:ring-2 focus:ring-indigo-300 focus:outline-none transition-all duration-300 hover:border-indigo-300 group-hover:bg-white text-sm sm:text-base"
-                placeholder="Enter your username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="group">
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-indigo-400 group-hover:text-indigo-600 transition-colors duration-300">
-                <FontAwesomeIcon icon={faLock} className="text-sm sm:text-base" />
-              </span>
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                className="block w-full px-9 sm:px-10 py-2.5 sm:py-3 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:border-indigo-400 focus:ring-2 focus:ring-indigo-300 focus:outline-none transition-all duration-300 hover:border-indigo-300 group-hover:bg-white text-sm sm:text-base pr-12"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-indigo-600 focus:outline-none"
-                onClick={togglePasswordVisibility}
-                tabIndex="-1"
-              >
-                <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} className="text-sm sm:text-base" />
-              </button>
-            </div>
-          </div>
-
-          <div className="group">
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-indigo-400 group-hover:text-indigo-600 transition-colors duration-300">
-                <FontAwesomeIcon icon={faUserTag} className="text-sm sm:text-base" />
-              </span>
-              <select
-                id="role"
-                className="block w-full px-9 sm:px-10 py-2.5 sm:py-3 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:border-indigo-400 focus:ring-2 focus:ring-indigo-300 focus:outline-none transition-all duration-300 hover:border-indigo-300 appearance-none group-hover:bg-white text-sm sm:text-base"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-              >
-                <option value="">Select Role (Optional)</option>
-                <option value="client">Client</option>
-                <option value="allocator">Allocator</option>
-                <option value="employee">Employee</option>
-              </select>
-              {/* Custom arrow */}
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                <svg className="w-3 h-3 sm:w-4 sm:h-4 fill-current" viewBox="0 0 20 20">
-                  <path d="M7 7l3-3 3 3m0 6l-3 3-3-3" strokeWidth="1.5" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round"></path>
-                </svg>
+              
+              {/* Welcome Text */}
+              <div className="text-center text-white relative z-10">
+                <h2 className="text-xl lg:text-2xl font-bold mb-3">Welcome Back</h2>
+                <p className="text-purple-100 text-sm lg:text-base opacity-90">Sign in to access your dashboard</p>
               </div>
             </div>
-            <p className="text-xs text-gray-500 mt-2 ml-1">
-              Select your role to enhance security (optional)
-            </p>
-          </div>
 
-          <div>
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-all duration-300 transform hover:-translate-y-1 text-sm sm:text-base"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 sm:mr-3"></div>
-                  <span>Signing in...</span>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center">
-                  <FontAwesomeIcon icon={faSignInAlt} className="mr-2 text-sm sm:text-base" />
-                  <span>Sign In</span>
+            {/* Right Side - Login Form */}
+            <div className="lg:w-1/2 p-6 lg:p-8 flex flex-col justify-center">
+              {/* Header */}
+              <div className="text-center mb-6">
+                <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">LOGIN</h1>
+                <p className="text-slate-400 text-sm">Sign in to your account</p>
+              </div>
+
+              {error && (
+                <div className={`border px-3 sm:px-4 py-3 rounded-lg mb-4 sm:mb-6 ${approvalPending ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-red-500/10 border-red-500/30 text-red-400'}`}>
+                  {approvalPending ? (
+                    <div className="flex items-start">
+                      <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2 mt-1 text-amber-400 text-sm flex-shrink-0" />
+                      <div>
+                        <p className="text-xs sm:text-sm">{error}</p>
+                        <p className="text-xs mt-1 text-amber-300">An allocator will review your request soon.</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center">
+                      <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2 text-red-400 text-sm flex-shrink-0" />
+                      <span className="text-xs sm:text-sm">{error}</span>
+                    </div>
+                  )}
                 </div>
               )}
-            </button>
-          </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between pt-2 space-y-2 sm:space-y-0">
-            <a 
-              href="/forgot-password" 
-              className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-800 transition-colors duration-300 underline"
-            >
-              Forgot Password?
-            </a>
-            
-            <a 
-              href="/register" 
-              className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-800 transition-colors duration-300 underline"
-            >
-              Create Account
-            </a>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="group">
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 group-hover:text-purple-400 transition-colors duration-300">
+                      <FontAwesomeIcon icon={faUser} className="text-sm sm:text-base" />
+                    </span>
+                    <input
+                      id="username"
+                      type="text"
+                      className="block w-full px-9 sm:px-10 py-2.5 sm:py-3 text-white bg-slate-700/50 border border-slate-600 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-500/50 focus:outline-none transition-all duration-300 hover:border-purple-400 group-hover:bg-slate-700 text-sm sm:text-base placeholder-slate-400"
+                      placeholder="USERNAME"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="group">
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 group-hover:text-purple-400 transition-colors duration-300">
+                      <FontAwesomeIcon icon={faLock} className="text-sm sm:text-base" />
+                    </span>
+                    <input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      className="block w-full px-9 sm:px-10 py-2.5 sm:py-3 text-white bg-slate-700/50 border border-slate-600 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-500/50 focus:outline-none transition-all duration-300 hover:border-purple-400 group-hover:bg-slate-700 text-sm sm:text-base pr-12 placeholder-slate-400"
+                      placeholder="PASSWORD"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-white focus:outline-none"
+                      onClick={togglePasswordVisibility}
+                      tabIndex="-1"
+                    >
+                      <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} className="text-sm sm:text-base" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="group">
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 group-hover:text-purple-400 transition-colors duration-300">
+                      <FontAwesomeIcon icon={faUserTag} className="text-sm sm:text-base" />
+                    </span>
+                    <select
+                      id="role"
+                      className="block w-full px-9 sm:px-10 py-2.5 sm:py-3 text-white bg-slate-700/50 border border-slate-600 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-500/50 focus:outline-none transition-all duration-300 hover:border-purple-400 appearance-none group-hover:bg-slate-700 text-sm sm:text-base"
+                      value={role}
+                      onChange={(e) => setRole(e.target.value)}
+                    >
+                      <option value="" className="bg-slate-800">Select Role (Optional)</option>
+                      <option value="client" className="bg-slate-800">Client</option>
+                      <option value="allocator" className="bg-slate-800">Allocator</option>
+                      <option value="employee" className="bg-slate-800">Employee</option>
+                    </select>
+                    {/* Custom arrow */}
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                      <svg className="w-3 h-3 sm:w-4 sm:h-4 fill-current" viewBox="0 0 20 20">
+                        <path d="M7 7l3-3 3 3m0 6l-3 3-3-3" strokeWidth="1.5" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-2 ml-1">
+                    Select your role to enhance security (optional)
+                  </p>
+                </div>
+
+                <div>
+                  <button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-500/50 transition-all duration-300 transform hover:-translate-y-1 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center justify-center">
+                        <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 sm:mr-3"></div>
+                        <span>SIGNING IN...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center">
+                        <FontAwesomeIcon icon={faSignInAlt} className="mr-2 text-sm sm:text-base" />
+                        <span>SUBMIT</span>
+                      </div>
+                    )}
+                  </button>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center justify-between pt-2 space-y-2 sm:space-y-0">
+                  <a 
+                    href="/forgot-password" 
+                    className="text-xs sm:text-sm text-purple-400 hover:text-purple-300 transition-colors duration-300 underline"
+                  >
+                    FORGOT PASSWORD
+                  </a>
+                  
+                  <a 
+                    href="/register" 
+                    className="text-xs sm:text-sm text-purple-400 hover:text-purple-300 transition-colors duration-300 underline"
+                  >
+                    REGISTER
+                  </a>
+                </div>
+              </form>
+            </div>
           </div>
-        </form>
-        
-        {/* Bottom decorative element */}
-        <div className="absolute bottom-0 left-0 right-0 h-8 sm:h-12 bg-gradient-to-r from-indigo-50 to-purple-50 opacity-70"></div>
+        </div>
       </div>
     </div>
   );

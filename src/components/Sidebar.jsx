@@ -306,10 +306,16 @@ const Sidebar = ({ userData, onLogout, isSidebarOpen, toggleSidebar }) => {
         {/* Company Logo/Name */}
         <div className="h-16 flex items-center justify-center border-b border-indigo-800 bg-indigo-950 relative overflow-hidden">
           {isCollapsed && !isHovering ? (
-            <h1 className="text-2xl font-bold text-white">B</h1>
+            <h1 className="text-2xl font-bold">
+              <span style={{ color: '#FF6600' }}>B</span>
+            </h1>
           ) : (
             <h1 className="text-xl font-bold flex items-center">
-              <span className="text-white">BID</span>
+              <span>
+                <span style={{ color: '#FF6600' }}>B</span>
+                <span style={{ color: '#1E3A8A' }}>I</span>
+                <span style={{ color: '#22C55E' }}>D</span>
+              </span>
               <span className="text-indigo-200 ml-2 hidden sm:inline">Task Allocator</span>
             </h1>
           )}

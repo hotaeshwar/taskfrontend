@@ -10,6 +10,7 @@ import {
   faEyeSlash,
   faUserTag
 } from '@fortawesome/free-solid-svg-icons';
+import illustrationImage from '../assets/images/illustration.png';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -87,263 +88,223 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 relative p-4 overflow-hidden">
-      {/* Background decorative elements */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
-        <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-        <div className="absolute bottom-1/3 left-1/4 w-80 h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-1/2 right-1/3 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex flex-col items-center justify-center p-4">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-700/20 via-slate-900/50 to-slate-900"></div>
+      
+      {/* Bid Task Allocator Heading */}
+      <div className="relative z-10 text-center mb-6">
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+          <span>
+            <span style={{ color: '#FF6600' }}>B</span>
+            <span style={{ color: '#1E3A8A' }}>i</span>
+            <span style={{ color: '#22C55E' }}>d</span>
+          </span>
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400 ml-1">
+            Task Allocator
+          </span>
+        </h1>
       </div>
 
-      <div className="bg-white bg-opacity-90 backdrop-blur-lg p-8 rounded-2xl shadow-2xl w-full max-w-md z-10 border border-gray-100 relative overflow-hidden transition-all duration-500 hover:shadow-indigo-200">
-        {/* Decorative top accent */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
-        
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold">
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-500 via-white to-green-600" style={{WebkitTextStroke: '1px #333'}}>
-              Bid
-            </span>
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 ml-1">
-              Task Allocator
-            </span>
-          </h1>
-          <p className="text-gray-600 mt-2 font-medium">Create your account to get started</p>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="bg-rose-50 border-l-4 border-rose-500 text-rose-700 p-4 rounded-lg mb-5 animate-pulse">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 mr-2 text-rose-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              <p className="text-sm font-medium">{error}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Success Message */}
-        {success && (
-          <div className="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-700 p-4 rounded-lg mb-5">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 mr-2 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <p className="text-sm font-medium">{success}</p>
-            </div>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Username Input */}
-          <div className="group">
-            <label className="block text-gray-700 text-sm font-medium mb-2 ml-1">
-              Username
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-indigo-400 group-hover:text-indigo-600 transition-colors duration-300">
-                <FontAwesomeIcon icon={faUser} />
-              </span>
-              <input
-                name="username"
-                type="text"
-                className="block w-full px-10 py-3 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:border-indigo-400 focus:ring-2 focus:ring-indigo-300 focus:outline-none transition-all duration-300 hover:border-indigo-300 group-hover:bg-white"
-                placeholder="Enter your username"
-                value={formData.username}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-
-          {/* Email Input */}
-          <div className="group">
-            <label className="block text-gray-700 text-sm font-medium mb-2 ml-1">
-              Email
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-indigo-400 group-hover:text-indigo-600 transition-colors duration-300">
-                <FontAwesomeIcon icon={faEnvelope} />
-              </span>
-              <input
-                name="email"
-                type="email"
-                className="block w-full px-10 py-3 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:border-indigo-400 focus:ring-2 focus:ring-indigo-300 focus:outline-none transition-all duration-300 hover:border-indigo-300 group-hover:bg-white"
-                placeholder="Enter your email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-
-          {/* Password Input */}
-          <div className="group">
-            <label className="block text-gray-700 text-sm font-medium mb-2 ml-1">
-              Password
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-indigo-400 group-hover:text-indigo-600 transition-colors duration-300">
-                <FontAwesomeIcon icon={faLock} />
-              </span>
-              <input
-                name="password"
-                type={showPassword.password ? "text" : "password"}
-                className="block w-full px-10 py-3 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:border-indigo-400 focus:ring-2 focus:ring-indigo-300 focus:outline-none transition-all duration-300 hover:border-indigo-300 group-hover:bg-white"
-                placeholder="Create a password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-indigo-600 focus:outline-none"
-                onClick={() => togglePasswordVisibility('password')}
-                tabIndex="-1"
-              >
-                <FontAwesomeIcon icon={showPassword.password ? faEyeSlash : faEye} />
-              </button>
-            </div>
-          </div>
-
-          {/* Confirm Password Input */}
-          <div className="group">
-            <label className="block text-gray-700 text-sm font-medium mb-2 ml-1">
-              Confirm Password
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-indigo-400 group-hover:text-indigo-600 transition-colors duration-300">
-                <FontAwesomeIcon icon={faLock} />
-              </span>
-              <input
-                name="confirm_password"
-                type={showPassword.confirm_password ? "text" : "password"}
-                className="block w-full px-10 py-3 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:border-indigo-400 focus:ring-2 focus:ring-indigo-300 focus:outline-none transition-all duration-300 hover:border-indigo-300 group-hover:bg-white"
-                placeholder="Confirm your password"
-                value={formData.confirm_password}
-                onChange={handleChange}
-                required
-              />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-indigo-600 focus:outline-none"
-                onClick={() => togglePasswordVisibility('confirm_password')}
-                tabIndex="-1"
-              >
-                <FontAwesomeIcon icon={showPassword.confirm_password ? faEyeSlash : faEye} />
-              </button>
-            </div>
-          </div>
-
-          {/* Role Selection */}
-          <div className="group">
-            <label className="block text-gray-700 text-sm font-medium mb-2 ml-1">
-              Role
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-indigo-400 group-hover:text-indigo-600 transition-colors duration-300">
-                <FontAwesomeIcon icon={faUserTag} />
-              </span>
-              <select
-                name="role"
-                className="block w-full px-10 py-3 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:border-indigo-400 focus:ring-2 focus:ring-indigo-300 focus:outline-none transition-all duration-300 hover:border-indigo-300 group-hover:bg-white appearance-none"
-                value={formData.role}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select Role</option>
-                <option value="employee">Employee</option>
-                <option value="allocator">Allocator</option>
-                <option value="client">Client</option>
-              </select>
-              {/* Custom arrow */}
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                  <path d="M7 7l3-3 3 3m0 6l-3 3-3-3" strokeWidth="1.5" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round"></path>
-                </svg>
+      {/* Main Container */}
+      <div className="relative z-10 w-full max-w-4xl mx-auto">
+        <div className="bg-slate-800/80 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-slate-700/50">
+          <div className="flex flex-col lg:flex-row min-h-[450px]">
+            
+            {/* Left Side - Illustration */}
+            <div className="lg:w-1/2 bg-gradient-to-br from-purple-600 to-blue-700 p-6 lg:p-8 flex flex-col justify-center items-center relative overflow-hidden">
+              {/* Background decoration */}
+              <div className="absolute inset-0 bg-[url(data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E)] opacity-30"></div>
+              
+              {/* Illustration Image */}
+              <div className="relative z-10 w-full max-w-xs mx-auto mb-6">
+                <img 
+                  src={illustrationImage} 
+                  alt="Registration Illustration" 
+                  className="w-full h-auto object-contain drop-shadow-2xl"
+                />
+              </div>
+              
+              {/* Welcome Text */}
+              <div className="text-center text-white relative z-10">
+                <h2 className="text-xl lg:text-2xl font-bold mb-3">Join Our Platform</h2>
+                <p className="text-purple-100 text-sm lg:text-base opacity-90">Create your account and start managing tasks efficiently</p>
               </div>
             </div>
-          </div>
 
-          {/* Submit Button */}
-          <div className="pt-2">
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-all duration-300 transform hover:-translate-y-1"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-3"></div>
-                  <span>Creating Account...</span>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center">
-                  <FontAwesomeIcon icon={faUserPlus} className="mr-2" />
-                  <span>Create Account</span>
+            {/* Right Side - Registration Form */}
+            <div className="lg:w-1/2 p-6 lg:p-8 flex flex-col justify-center">
+              {/* Header */}
+              <div className="text-center mb-6">
+                <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">REGISTER</h1>
+                <p className="text-slate-400 text-sm">Create your new account</p>
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-lg mb-4 backdrop-blur-sm">
+                  <div className="flex items-center">
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    <p className="text-xs font-medium">{error}</p>
+                  </div>
                 </div>
               )}
-            </button>
-          </div>
 
-          {/* Login Link - Updated to be a normal Link */}
-          <div className="text-center mt-6">
-            <p className="text-gray-600">
-              Already have an account?{' '}
-              <Link 
-                to="/" 
-                className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors duration-300 hover:underline"
-              >
-                Sign In
-              </Link>
-            </p>
+              {/* Success Message */}
+              {success && (
+                <div className="bg-green-500/10 border border-green-500/30 text-green-400 p-3 rounded-lg mb-4 backdrop-blur-sm">
+                  <div className="flex items-center">
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <p className="text-xs font-medium">{success}</p>
+                  </div>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Username Input */}
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FontAwesomeIcon icon={faUser} className="text-slate-400 text-sm" />
+                  </div>
+                  <input
+                    name="username"
+                    type="text"
+                    className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-3 pl-10 pr-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm text-sm"
+                    placeholder="USERNAME"
+                    value={formData.username}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                {/* Email Input */}
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FontAwesomeIcon icon={faEnvelope} className="text-slate-400 text-sm" />
+                  </div>
+                  <input
+                    name="email"
+                    type="email"
+                    className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-3 pl-10 pr-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm text-sm"
+                    placeholder="EMAIL"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                {/* Password Input */}
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FontAwesomeIcon icon={faLock} className="text-slate-400 text-sm" />
+                  </div>
+                  <input
+                    name="password"
+                    type={showPassword.password ? "text" : "password"}
+                    className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-3 pl-10 pr-10 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm text-sm"
+                    placeholder="PASSWORD"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white focus:outline-none"
+                    onClick={() => togglePasswordVisibility('password')}
+                    tabIndex="-1"
+                  >
+                    <FontAwesomeIcon icon={showPassword.password ? faEyeSlash : faEye} className="text-sm" />
+                  </button>
+                </div>
+
+                {/* Confirm Password Input */}
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FontAwesomeIcon icon={faLock} className="text-slate-400 text-sm" />
+                  </div>
+                  <input
+                    name="confirm_password"
+                    type={showPassword.confirm_password ? "text" : "password"}
+                    className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-3 pl-10 pr-10 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm text-sm"
+                    placeholder="CONFIRM PASSWORD"
+                    value={formData.confirm_password}
+                    onChange={handleChange}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white focus:outline-none"
+                    onClick={() => togglePasswordVisibility('confirm_password')}
+                    tabIndex="-1"
+                  >
+                    <FontAwesomeIcon icon={showPassword.confirm_password ? faEyeSlash : faEye} className="text-sm" />
+                  </button>
+                </div>
+
+                {/* Role Selection */}
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FontAwesomeIcon icon={faUserTag} className="text-slate-400 text-sm" />
+                  </div>
+                  <select
+                    name="role"
+                    className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-3 pl-10 pr-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm appearance-none text-sm"
+                    value={formData.role}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="" className="bg-slate-800">SELECT ROLE</option>
+                    <option value="employee" className="bg-slate-800">Employee</option>
+                    <option value="allocator" className="bg-slate-800">Allocator</option>
+                    <option value="client" className="bg-slate-800">Client</option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                    <svg className="w-3 h-3 fill-current" viewBox="0 0 20 20">
+                      <path d="M7 7l3-3 3 3m0 6l-3 3-3-3" strokeWidth="1.5" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-500/50 transition-all duration-300 transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <div className="flex items-center justify-center">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                      <span>CREATING ACCOUNT...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center">
+                      <FontAwesomeIcon icon={faUserPlus} className="mr-2 text-sm" />
+                      <span>REGISTER</span>
+                    </div>
+                  )}
+                </button>
+
+                {/* Login Link */}
+                <div className="text-center pt-3">
+                  <p className="text-slate-400 text-sm">
+                    Already have an account?{' '}
+                    <Link 
+                      to="/" 
+                      className="text-purple-400 hover:text-purple-300 font-medium transition-colors duration-300 hover:underline"
+                    >
+                      SIGN IN
+                    </Link>
+                  </p>
+                </div>
+              </form>
+            </div>
           </div>
-        </form>
-        
-        {/* Bottom decorative element */}
-        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-r from-indigo-50 to-purple-50 opacity-70"></div>
+        </div>
       </div>
-      
-      {/* Floating particles */}
-      <div className="absolute top-20 left-10 w-3 h-3 bg-indigo-500 rounded-full opacity-70 animate-float"></div>
-      <div className="absolute bottom-20 right-20 w-2 h-2 bg-purple-500 rounded-full opacity-60 animate-float animation-delay-1000"></div>
-      <div className="absolute top-1/3 right-10 w-4 h-4 bg-pink-500 rounded-full opacity-60 animate-float animation-delay-2000"></div>
-      
-      <style jsx>{`
-        @keyframes float {
-          0% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(10deg); }
-          100% { transform: translateY(0px) rotate(0deg); }
-        }
-        
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
-        }
-        
-        .animation-delay-1000 {
-          animation-delay: 1s;
-        }
-        
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-        
-        @keyframes blob {
-          0% { transform: scale(1) translate(0px, 0px); }
-          33% { transform: scale(1.1) translate(20px, -20px); }
-          66% { transform: scale(0.9) translate(-20px, 20px); }
-          100% { transform: scale(1) translate(0px, 0px); }
-        }
-        
-        .animate-blob {
-          animation: blob 15s infinite alternate;
-        }
-      `}</style>
     </div>
   );
 };
