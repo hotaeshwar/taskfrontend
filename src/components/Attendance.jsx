@@ -431,10 +431,13 @@ const Payroll = () => {
         </h1>
         <button 
           onClick={goToHome}
-          className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-bold py-2 px-4 rounded-lg flex items-center transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
+          className="bg-white bg-opacity-20 hover:bg-white hover:bg-opacity-90 text-white hover:text-red-600 font-bold py-2 px-4 rounded-lg flex items-center transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 border border-white border-opacity-30 hover:border-red-400"
         >
-          <FontAwesomeIcon icon={faTimes} className="mr-2" />
-          Close
+          <FontAwesomeIcon 
+            icon={faTimes} 
+            className="mr-2 text-lg hover:rotate-90 transition-transform duration-300" 
+          />
+          <span className="font-semibold">Close</span>
         </button>
       </div>
 

@@ -313,7 +313,7 @@ const Sidebar = ({ userData, onLogout, isSidebarOpen, toggleSidebar }) => {
             <h1 className="text-xl font-bold flex items-center">
               <span>
                 <span style={{ color: '#FF6600' }}>B</span>
-                <span style={{ color: '#1E3A8A' }}>I</span>
+                <span style={{ color: '#1E3A8A' }}>i</span>
                 <span style={{ color: '#22C55E' }}>D</span>
               </span>
               <span className="text-indigo-200 ml-2 hidden sm:inline">Task Allocator</span>

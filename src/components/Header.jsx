@@ -15,7 +15,9 @@ const Header = ({ userData, toggleSidebar }) => {
         </button>
         
         <h1 className="text-xl font-bold hidden lg:block">
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">BID</span>
+          <span className="text-orange-500">B</span>
+          <span className="text-blue-900">i</span>
+          <span className="text-green-600">D</span>
           <span className="text-gray-700"> Task Allocator</span>
         </h1>
       </div>
