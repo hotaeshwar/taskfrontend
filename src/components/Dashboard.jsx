@@ -465,15 +465,15 @@ const Dashboard = ({ userData, onLogout }) => {
     }, 5000);
   };
 
-  const fetchDashboardData = useCallback(async () => {
+  // FIXED: Removed useCallback and dependencies that were causing infinite loop
+  const fetchDashboardData = async () => {
     setIsLoading(true);
     setError('');
 
     try {
-      const endpoint = userData.role === 'allocator'
+      const endpoint = userData?.role === 'allocator'
         ? 'https://taskapi.buildingindiadigital.com/allocators/dashboard'
-        : 'https://taskapi.buildingindiadigital.com/employees/dashboard'
-;
+        : 'https://taskapi.buildingindiadigital.com/employees/dashboard';
 
       const response = await fetch(endpoint, {
         headers: {
@@ -488,12 +488,12 @@ const Dashboard = ({ userData, onLogout }) => {
       const data = await response.json();
       setDashboardData(data);
 
-      if (userData.role === 'employee') {
+      if (userData?.role === 'employee') {
         await fetchPayrollRecords();
         await fetchTimesheetData();
       }
 
-      if (userData.role === 'allocator') {
+      if (userData?.role === 'allocator') {
         try {
           const approvalsResponse = await fetch('https://taskapi.buildingindiadigital.com/allocators/pending-approvals', {
             headers: {
@@ -522,8 +522,9 @@ const Dashboard = ({ userData, onLogout }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [userData]);
+  };
 
+  // FIXED: Removed fetchDashboardData from dependency array to prevent infinite loop
   useEffect(() => {
     const fetchData = () => {
       if (userData) {
@@ -534,7 +535,7 @@ const Dashboard = ({ userData, onLogout }) => {
     fetchData();
     const intervalId = setInterval(fetchData, 30000);
     return () => clearInterval(intervalId);
-  }, [userData, fetchDashboardData]);
+  }, [userData]); // ONLY userData dependency
 
   // Collapsible Timesheet Day Component
   const TimesheetDay = ({ day, isExpanded, onToggle }) => (

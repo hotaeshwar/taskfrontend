@@ -111,10 +111,11 @@ const LoginPage = ({ onLogin }) => {
     setShowPassword(!showPassword);
   };
 
-  // Fetch count of pending approval requests
+  // FIXED: Fetch count of pending approval requests
   const fetchPendingApprovalCount = async (token) => {
     try {
-      const response = await fetch('https://taskapi.buildingindiadigital.com/pending-approvals', {
+      // FIXED: Added /allocators/ prefix to match backend endpoint
+      const response = await fetch('https://taskapi.buildingindiadigital.com/allocators/pending-approvals', {
         headers: {
           'Authorization': `Bearer ${token || allocatorToken}`
         }
