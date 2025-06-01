@@ -29,7 +29,7 @@ const Login = () => {
   useEffect(() => {
     const fetchStates = async () => {
       try {
-        const response = await axios.get("https://admissionapi.buildingindiadigital.com/auth/states");
+        const response = await axios.get("/auth/states");
         if (response.data.success) {
           setStates(response.data.data);
         }
@@ -52,7 +52,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("https://admissionapi.buildingindiadigital.com/auth/login", formData);
+      const response = await axios.post("auth/login", formData);
       if (response.data.success) {
         const { role, unique_code, first_name } = response.data.data;
 
