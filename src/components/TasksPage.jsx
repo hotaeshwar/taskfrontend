@@ -186,7 +186,9 @@ const TasksPage = ({ userData, onLogout }) => {
       });
 
       const sheetData = {
-        ...createSheetForm,
+        month: createSheetForm.month,
+        year: createSheetForm.year,
+        assigned_to: createSheetForm.assigned_to === '' ? null : parseInt(createSheetForm.assigned_to),
         entries
       };
 
@@ -200,7 +202,8 @@ const TasksPage = ({ userData, onLogout }) => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create weekly sheet');
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to create weekly sheet');
       }
 
       setShowCreateSheetModal(false);
