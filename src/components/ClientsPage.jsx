@@ -565,3 +565,4 @@ const ClientsPage = ({ userData, onLogout }) => {
 };
 
 export default ClientsPage;
+

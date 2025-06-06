@@ -8,7 +8,8 @@ import {
   faUserPlus, 
   faEye, 
   faEyeSlash,
-  faUserTag
+  faUserTag,
+  faKey
 } from '@fortawesome/free-solid-svg-icons';
 import illustrationImage from '../assets/images/illustration.png';
 
@@ -18,7 +19,8 @@ const RegisterPage = () => {
     email: '',
     password: '',
     confirm_password: '',
-    role: ''
+    role: '',
+    secret_key: ''
   });
   
   const [error, setError] = useState('');
@@ -58,13 +60,27 @@ const RegisterPage = () => {
       return;
     }
 
+    // Prepare payload - only include secret_key if role is allocator
+    const payload = {
+      username: formData.username,
+      email: formData.email,
+      password: formData.password,
+      confirm_password: formData.confirm_password,
+      role: formData.role
+    };
+
+    // Add secret_key only for allocator role
+    if (formData.role === 'allocator') {
+      payload.secret_key = formData.secret_key;
+    }
+
     try {
       const response = await fetch('https://taskapi.buildingindiadigital.com/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
 
       const data = await response.json();
@@ -268,6 +284,27 @@ const RegisterPage = () => {
                     </svg>
                   </div>
                 </div>
+
+                {/* Secret Key Input - Only show when role is 'allocator' */}
+                {formData.role === 'allocator' && (
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FontAwesomeIcon icon={faKey} className="text-slate-400 text-sm" />
+                    </div>
+                    <input
+                      name="secret_key"
+                      type="password"
+                      className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-3 pl-10 pr-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm text-sm"
+                      placeholder="ALLOCATOR SECRET KEY"
+                      value={formData.secret_key}
+                      onChange={handleChange}
+                      required
+                    />
+                    <div className="mt-1 text-xs text-slate-400 px-1">
+                      * Required for allocator registration
+                    </div>
+                  </div>
+                )}
 
                 {/* Submit Button */}
                 <button
