@@ -60,7 +60,7 @@ const TasksPage = ({ userData, onLogout }) => {
   });
   const [showOlderTasks, setShowOlderTasks] = useState(false);
 
-  // NEW WEEKLY SHEET STATES
+  // WEEKLY SHEET STATES
   const [activeTab, setActiveTab] = useState('tasks');
   const [weeklySheets, setWeeklySheets] = useState([]);
   const [showCreateSheetModal, setShowCreateSheetModal] = useState(false);
@@ -210,6 +210,7 @@ const TasksPage = ({ userData, onLogout }) => {
         assigned_to: ''
       });
       fetchWeeklySheets();
+      alert('Weekly sheet created successfully!');
     } catch (error) {
       console.error('Error creating weekly sheet:', error);
       setError(error.message || 'Failed to create weekly sheet. Please try again.');
@@ -305,63 +306,121 @@ const TasksPage = ({ userData, onLogout }) => {
     }
   };
 
-  // FIXED: Improved openSheetEditor function
+  // FIXED: Improved openSheetEditor function with better error handling
   const openSheetEditor = async (sheet) => {
-    setSelectedSheet(sheet);
+    console.log('Opening sheet editor for:', sheet);
     
-    // Ensure entries are properly loaded
-    if (sheet.entries && sheet.entries.length > 0) {
-      setSheetEntries(sheet.entries);
-    } else {
-      // If no entries, create default structure
-      const defaultEntries = [];
-      CLIENT_LIST.forEach(client => {
-        for (let week = 1; week <= 5; week++) {
-          defaultEntries.push({
-            id: `temp-${client}-${week}`, // Temporary ID for new entries
-            client_name: client,
-            week_number: week,
-            posts_count: 0,
-            reels_count: 0,
-            story_description: "COLLAGE + WTSAP STORY",
-            is_topical_day: false
-          });
-        }
-      });
-      setSheetEntries(defaultEntries);
+    try {
+      setSelectedSheet(sheet);
+      
+      // Initialize entries based on what we have
+      if (sheet.entries && Array.isArray(sheet.entries) && sheet.entries.length > 0) {
+        console.log('Using existing entries:', sheet.entries.length);
+        setSheetEntries([...sheet.entries]); // Create a copy
+      } else {
+        console.log('Creating default entries for all clients and weeks');
+        // Create default structure for all clients and weeks
+        const defaultEntries = [];
+        CLIENT_LIST.forEach(client => {
+          for (let week = 1; week <= 5; week++) {
+            defaultEntries.push({
+              id: `temp-${client}-${week}`, // Temporary ID for new entries
+              client_name: client,
+              week_number: week,
+              posts_count: 0,
+              reels_count: 0,
+              story_description: "COLLAGE + WTSAP STORY",
+              is_topical_day: false
+            });
+          }
+        });
+        setSheetEntries(defaultEntries);
+      }
+      
+      // Clear any previous errors
+      setError('');
+      setShowSheetEditorModal(true);
+    } catch (error) {
+      console.error('Error opening sheet editor:', error);
+      setError('Failed to open sheet editor. Please try again.');
     }
-    
-    setShowSheetEditorModal(true);
   };
 
   // FIXED: Improved updateSheetEntry function
-  const updateSheetEntry = (entryId, field, value) => {
-    setSheetEntries(entries => 
-      entries.map(entry => {
-        // Handle both numeric IDs and temporary string IDs
-        const matchesId = entry.id === entryId || 
-                         (typeof entryId === 'string' && entryId.includes(entry.client_name) && entryId.includes(entry.week_number.toString()));
+  const updateSheetEntry = (entryIdentifier, field, value) => {
+    console.log('Updating entry:', entryIdentifier, field, value);
+    
+    setSheetEntries(prevEntries => {
+      return prevEntries.map(entry => {
+        let matches = false;
         
-        return matchesId 
-          ? { ...entry, [field]: field.includes('_count') ? parseInt(value) || 0 : value }
-          : entry;
-      })
-    );
+        // Handle different types of identifiers
+        if (typeof entryIdentifier === 'number') {
+          matches = entry.id === entryIdentifier;
+        } else if (typeof entryIdentifier === 'string') {
+          if (entryIdentifier.startsWith('temp-')) {
+            // For temporary IDs like "temp-DND-1", match by client and week
+            const parts = entryIdentifier.split('-');
+            if (parts.length >= 3) {
+              const client = parts.slice(1, -1).join('-'); // Handle multi-word clients
+              const week = parseInt(parts[parts.length - 1]);
+              matches = entry.client_name === client && entry.week_number === week;
+            }
+          } else {
+            matches = entry.id.toString() === entryIdentifier.toString();
+          }
+        }
+        
+        if (matches) {
+          const updatedEntry = { ...entry };
+          if (field.includes('_count')) {
+            updatedEntry[field] = parseInt(value) || 0;
+          } else {
+            updatedEntry[field] = value || "";
+          }
+          console.log('Updated entry:', updatedEntry);
+          return updatedEntry;
+        }
+        
+        return entry;
+      });
+    });
   };
 
   // FIXED: Improved saveSheetChanges function
   const saveSheetChanges = async () => {
+    if (!selectedSheet) {
+      console.error('No selected sheet');
+      setError('No sheet selected for saving');
+      return;
+    }
+
+    console.log('Saving sheet changes for:', selectedSheet.sheet_id);
+    console.log('Current entries:', sheetEntries);
+
     try {
+      setError(''); // Clear previous errors
+      
       const updates = { 
-        entries: sheetEntries.map(entry => ({
-          id: typeof entry.id === 'string' && entry.id.startsWith('temp-') ? undefined : entry.id,
-          client_name: entry.client_name,
-          week_number: entry.week_number,
-          posts_count: entry.posts_count,
-          reels_count: entry.reels_count,
-          story_description: entry.story_description
-        }))
+        entries: sheetEntries.map(entry => {
+          const cleanEntry = {
+            client_name: entry.client_name,
+            week_number: entry.week_number,
+            posts_count: parseInt(entry.posts_count) || 0,
+            reels_count: parseInt(entry.reels_count) || 0,
+            story_description: entry.story_description || ""
+          };
+          
+          // Only include ID if it's not a temporary ID
+          if (entry.id && !entry.id.toString().startsWith('temp-')) {
+            cleanEntry.id = entry.id;
+          }
+          
+          return cleanEntry;
+        })
       };
+
+      console.log('Sending updates:', updates);
 
       const endpoint = userData.role === 'allocator' 
         ? `https://taskapi.buildingindiadigital.com/allocators/weekly-sheets/${selectedSheet.sheet_id}`
@@ -377,16 +436,34 @@ const TasksPage = ({ userData, onLogout }) => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save changes');
+        const errorText = await response.text();
+        console.error('Save failed:', errorText);
+        throw new Error(`Failed to save changes: ${response.status} ${response.statusText}`);
       }
 
+      const result = await response.json();
+      console.log('Save successful:', result);
+      
       alert('Changes saved successfully!');
       setShowSheetEditorModal(false);
       fetchWeeklySheets();
     } catch (error) {
       console.error('Error saving changes:', error);
-      setError('Failed to save changes. Please try again.');
+      setError(`Failed to save changes: ${error.message}`);
     }
+  };
+
+  // Helper function to find entry for a specific client and week
+  const findEntryForCell = (client, week) => {
+    return sheetEntries.find(entry => 
+      entry.client_name === client && entry.week_number === week
+    );
+  };
+
+  // Helper function to get entry key for updates
+  const getEntryKey = (client, week) => {
+    const entry = findEntryForCell(client, week);
+    return entry?.id || `temp-${client}-${week}`;
   };
 
   const fetchClientsAndEmployees = async () => {
@@ -740,7 +817,7 @@ const TasksPage = ({ userData, onLogout }) => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {weeklySheets.map((sheet) => (
-                      <tr key={sheet.id} className="hover:bg-gray-50">
+                      <tr key={sheet.sheet_id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">
                             {getMonthName(sheet.month)} {sheet.year}
@@ -926,6 +1003,21 @@ const TasksPage = ({ userData, onLogout }) => {
             </nav>
           </div>
 
+          {/* Error Display */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+              <div className="flex justify-between items-center">
+                <span>{error}</span>
+                <button 
+                  onClick={() => setError('')}
+                  className="text-red-900 hover:text-red-700 ml-4"
+                >
+                  <FontAwesomeIcon icon={faTimes} />
+                </button>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'tasks' ? (
             <div>
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
@@ -1002,10 +1094,6 @@ const TasksPage = ({ userData, onLogout }) => {
               {isLoading ? (
                 <div className="flex justify-center items-center h-64">
                   <Loader />
-                </div>
-              ) : error ? (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                  {error}
                 </div>
               ) : filteredTasks.length === 0 ? (
                 <div className="bg-white rounded-lg shadow-md p-8 text-center">
@@ -1229,102 +1317,130 @@ const TasksPage = ({ userData, onLogout }) => {
               </div>
             </div>
 
-            {/* Debug info - can be removed in production */}
-            <div className="mb-4 p-2 bg-gray-100 rounded text-xs">
-              <p>Sheet Status: {selectedSheet.status}</p>
-              <p>Entries Count: {sheetEntries.length}</p>
-              <p>Can Edit: {userData.role === 'allocator' ? 'Yes (Allocator)' : 
-                           (selectedSheet.status !== 'submitted' && selectedSheet.created_by === selectedSheet.assigned_to) ? 'Yes' : 'No'}</p>
-            </div>
+            {/* Debug info for development */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mb-4 p-2 bg-gray-100 rounded text-xs">
+                <p>Sheet Status: {selectedSheet.status}</p>
+                <p>Entries Count: {sheetEntries.length}</p>
+                <p>Can Edit: {userData.role === 'allocator' ? 'Yes (Allocator)' : 
+                             (selectedSheet.status !== 'submitted' && selectedSheet.created_by === selectedSheet.assigned_to) ? 'Yes' : 'No'}</p>
+                <p>Sheet ID: {selectedSheet.sheet_id}</p>
+              </div>
+            )}
 
-            {/* Sheet Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse border border-gray-300">
-                <thead>
-                  <tr>
-                    <th className="border border-gray-300 p-2 bg-gray-100">CLIENTS</th>
-                    {[1, 2, 3, 4, 5].map(week => (
-                      <th key={week} className="border border-gray-300 p-2 bg-gray-100" colSpan="3">
-                        WEEK {week}
-                        <div className="text-xs text-gray-600">
-                          ({week === 1 ? '1-7' : week === 2 ? '8-14' : week === 3 ? '15-21' : week === 4 ? '22-28' : '29-30'})
-                        </div>
-                      </th>
-                    ))}
-                  </tr>
-                  <tr>
-                    <th className="border border-gray-300 p-2 bg-gray-50"></th>
-                    {[1, 2, 3, 4, 5].map(week => (
-                      <React.Fragment key={week}>
-                        <th className="border border-gray-300 p-1 bg-gray-50 text-xs">POSTS</th>
-                        <th className="border border-gray-300 p-1 bg-gray-50 text-xs">REELS</th>
-                        <th className="border border-gray-300 p-1 bg-gray-50 text-xs">STORY</th>
-                      </React.Fragment>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {CLIENT_LIST.map(client => (
-                    <tr key={client}>
-                      <td className="border border-gray-300 p-2 font-medium">{client}</td>
-                      {[1, 2, 3, 4, 5].map(week => {
-                        // Find entry - handle both cases
-                        const entry = sheetEntries.find(e => 
-                          e.client_name === client && e.week_number === week
-                        );
-                        
-                        // Determine if field should be read-only
-                        const isReadOnly = userData.role === 'allocator' ? false : 
-                          (selectedSheet.status === 'submitted' || selectedSheet.created_by !== selectedSheet.assigned_to);
-                        
-                        // Create unique identifier for this cell
-                        const entryKey = entry?.id || `${client}-${week}`;
-                        
-                        return (
-                          <React.Fragment key={week}>
-                            <td className="border border-gray-300 p-1">
-                              <input
-                                type="number"
-                                value={entry?.posts_count || 0}
-                                onChange={(e) => updateSheetEntry(entryKey, 'posts_count', e.target.value)}
-                                readOnly={isReadOnly}
-                                className={`w-full text-center border-none outline-none ${isReadOnly ? 'bg-gray-100' : 'bg-white'}`}
-                                min="0"
-                              />
-                            </td>
-                            <td className="border border-gray-300 p-1">
-                              <input
-                                type="number"
-                                value={entry?.reels_count || 0}
-                                onChange={(e) => updateSheetEntry(entryKey, 'reels_count', e.target.value)}
-                                readOnly={isReadOnly}
-                                className={`w-full text-center border-none outline-none ${isReadOnly ? 'bg-gray-100' : 'bg-white'}`}
-                                min="0"
-                              />
-                            </td>
-                            <td className="border border-gray-300 p-1">
-                              <input
-                                type="text"
-                                value={entry?.story_description || ""}
-                                onChange={(e) => updateSheetEntry(entryKey, 'story_description', e.target.value)}
-                                readOnly={isReadOnly}
-                                className={`w-full text-center border-none outline-none text-xs ${isReadOnly ? 'bg-gray-100' : 'bg-white'}`}
-                                placeholder="Story description"
-                              />
-                            </td>
-                          </React.Fragment>
-                        );
-                      })}
+            {/* Check if we have entries to display */}
+            {sheetEntries.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-500 mb-4">No entries found. Click below to create default entries.</p>
+                <button 
+                  onClick={() => {
+                    const defaultEntries = [];
+                    CLIENT_LIST.forEach(client => {
+                      for (let week = 1; week <= 5; week++) {
+                        defaultEntries.push({
+                          id: `temp-${client}-${week}`,
+                          client_name: client,
+                          week_number: week,
+                          posts_count: 0,
+                          reels_count: 0,
+                          story_description: "COLLAGE + WTSAP STORY",
+                          is_topical_day: false
+                        });
+                      }
+                    });
+                    setSheetEntries(defaultEntries);
+                  }}
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  Create Default Entries
+                </button>
+              </div>
+            ) : (
+              /* Sheet Table */
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-gray-300">
+                  <thead>
+                    <tr>
+                      <th className="border border-gray-300 p-2 bg-gray-100">CLIENTS</th>
+                      {[1, 2, 3, 4, 5].map(week => (
+                        <th key={week} className="border border-gray-300 p-2 bg-gray-100" colSpan="3">
+                          WEEK {week}
+                          <div className="text-xs text-gray-600">
+                            ({week === 1 ? '1-7' : week === 2 ? '8-14' : week === 3 ? '15-21' : week === 4 ? '22-28' : '29-30'})
+                          </div>
+                        </th>
+                      ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                    <tr>
+                      <th className="border border-gray-300 p-2 bg-gray-50"></th>
+                      {[1, 2, 3, 4, 5].map(week => (
+                        <React.Fragment key={week}>
+                          <th className="border border-gray-300 p-1 bg-gray-50 text-xs">POSTS</th>
+                          <th className="border border-gray-300 p-1 bg-gray-50 text-xs">REELS</th>
+                          <th className="border border-gray-300 p-1 bg-gray-50 text-xs">STORY</th>
+                        </React.Fragment>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {CLIENT_LIST.map(client => (
+                      <tr key={client}>
+                        <td className="border border-gray-300 p-2 font-medium">{client}</td>
+                        {[1, 2, 3, 4, 5].map(week => {
+                          // Find entry for this client and week
+                          const entry = findEntryForCell(client, week);
+                          
+                          // Determine if field should be read-only
+                          const isReadOnly = userData.role === 'allocator' ? false : 
+                            (selectedSheet.status === 'submitted' || selectedSheet.created_by !== selectedSheet.assigned_to);
+                          
+                          // Get entry key for updates
+                          const entryKey = getEntryKey(client, week);
+                          
+                          return (
+                            <React.Fragment key={week}>
+                              <td className="border border-gray-300 p-1">
+                                <input
+                                  type="number"
+                                  value={entry?.posts_count || 0}
+                                  onChange={(e) => updateSheetEntry(entryKey, 'posts_count', e.target.value)}
+                                  readOnly={isReadOnly}
+                                  className={`w-full text-center border-none outline-none ${isReadOnly ? 'bg-gray-100' : 'bg-white'}`}
+                                  min="0"
+                                />
+                              </td>
+                              <td className="border border-gray-300 p-1">
+                                <input
+                                  type="number"
+                                  value={entry?.reels_count || 0}
+                                  onChange={(e) => updateSheetEntry(entryKey, 'reels_count', e.target.value)}
+                                  readOnly={isReadOnly}
+                                  className={`w-full text-center border-none outline-none ${isReadOnly ? 'bg-gray-100' : 'bg-white'}`}
+                                  min="0"
+                                />
+                              </td>
+                              <td className="border border-gray-300 p-1">
+                                <input
+                                  type="text"
+                                  value={entry?.story_description || ""}
+                                  onChange={(e) => updateSheetEntry(entryKey, 'story_description', e.target.value)}
+                                  readOnly={isReadOnly}
+                                  className={`w-full text-center border-none outline-none text-xs ${isReadOnly ? 'bg-gray-100' : 'bg-white'}`}
+                                  placeholder="Story description"
+                                />
+                              </td>
+                            </React.Fragment>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
-      )}
-      
-      {/* Create Task Modal for Allocators */}
+      )}{/* Create Task Modal for Allocators */}
       {showCreateTaskModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
@@ -1637,3 +1753,4 @@ const TasksPage = ({ userData, onLogout }) => {
 };
 
 export default TasksPage;
+// repushed
