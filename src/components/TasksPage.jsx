@@ -42,7 +42,7 @@ const TasksPage = ({ userData, onLogout }) => {
     completion_description: '',
     hurdles_faced: '',
     hours_worked: 0,
-    work_location: 'office' // Added work location field
+    work_location: 'office'
   });
   const [statusUpdateForm, setStatusUpdateForm] = useState({
     status: 'approved',
@@ -58,11 +58,10 @@ const TasksPage = ({ userData, onLogout }) => {
     due_date: '',
     completion_instructions: ''
   });
-  // Added state to control showing older tasks
   const [showOlderTasks, setShowOlderTasks] = useState(false);
 
   // NEW WEEKLY SHEET STATES
-  const [activeTab, setActiveTab] = useState('tasks'); // 'tasks' or 'weekly-sheets'
+  const [activeTab, setActiveTab] = useState('tasks');
   const [weeklySheets, setWeeklySheets] = useState([]);
   const [showCreateSheetModal, setShowCreateSheetModal] = useState(false);
   const [showSheetEditorModal, setShowSheetEditorModal] = useState(false);
@@ -108,7 +107,7 @@ const TasksPage = ({ userData, onLogout }) => {
     }
   };
 
-  // NEW WEEKLY SHEET FUNCTIONS
+  // WEEKLY SHEET FUNCTIONS
   const fetchWeeklySheets = async () => {
     try {
       const endpoint = userData.role === 'allocator' 
@@ -129,7 +128,6 @@ const TasksPage = ({ userData, onLogout }) => {
       setWeeklySheets(data);
 
       if (userData.role === 'employee') {
-        // Also fetch current month sheet
         try {
           const currentResponse = await fetch('https://taskapi.buildingindiadigital.com/employees/weekly-sheets/current', {
             headers: {
@@ -146,7 +144,6 @@ const TasksPage = ({ userData, onLogout }) => {
       }
 
       if (userData.role === 'allocator') {
-        // Fetch submitted sheets for review
         try {
           const submittedResponse = await fetch('https://taskapi.buildingindiadigital.com/allocators/employee-sheets/submitted', {
             headers: {
@@ -215,7 +212,7 @@ const TasksPage = ({ userData, onLogout }) => {
       fetchWeeklySheets();
     } catch (error) {
       console.error('Error creating weekly sheet:', error);
-      setError('Failed to create weekly sheet. Please try again.');
+      setError(error.message || 'Failed to create weekly sheet. Please try again.');
     }
   };
 
@@ -308,27 +305,58 @@ const TasksPage = ({ userData, onLogout }) => {
     }
   };
 
+  // FIXED: Improved openSheetEditor function
   const openSheetEditor = async (sheet) => {
     setSelectedSheet(sheet);
-    setSheetEntries(sheet.entries || []);
+    
+    // Ensure entries are properly loaded
+    if (sheet.entries && sheet.entries.length > 0) {
+      setSheetEntries(sheet.entries);
+    } else {
+      // If no entries, create default structure
+      const defaultEntries = [];
+      CLIENT_LIST.forEach(client => {
+        for (let week = 1; week <= 5; week++) {
+          defaultEntries.push({
+            id: `temp-${client}-${week}`, // Temporary ID for new entries
+            client_name: client,
+            week_number: week,
+            posts_count: 0,
+            reels_count: 0,
+            story_description: "COLLAGE + WTSAP STORY",
+            is_topical_day: false
+          });
+        }
+      });
+      setSheetEntries(defaultEntries);
+    }
+    
     setShowSheetEditorModal(true);
   };
 
+  // FIXED: Improved updateSheetEntry function
   const updateSheetEntry = (entryId, field, value) => {
     setSheetEntries(entries => 
-      entries.map(entry => 
-        entry.id === entryId 
-          ? { ...entry, [field]: value }
-          : entry
-      )
+      entries.map(entry => {
+        // Handle both numeric IDs and temporary string IDs
+        const matchesId = entry.id === entryId || 
+                         (typeof entryId === 'string' && entryId.includes(entry.client_name) && entryId.includes(entry.week_number.toString()));
+        
+        return matchesId 
+          ? { ...entry, [field]: field.includes('_count') ? parseInt(value) || 0 : value }
+          : entry;
+      })
     );
   };
 
+  // FIXED: Improved saveSheetChanges function
   const saveSheetChanges = async () => {
     try {
       const updates = { 
         entries: sheetEntries.map(entry => ({
-          id: entry.id,
+          id: typeof entry.id === 'string' && entry.id.startsWith('temp-') ? undefined : entry.id,
+          client_name: entry.client_name,
+          week_number: entry.week_number,
           posts_count: entry.posts_count,
           reels_count: entry.reels_count,
           story_description: entry.story_description
@@ -361,12 +389,10 @@ const TasksPage = ({ userData, onLogout }) => {
     }
   };
 
-  // Only for allocator role
   const fetchClientsAndEmployees = async () => {
     if (userData.role !== 'allocator') return;
     
     try {
-      // Fetch clients
       const clientsResponse = await fetch('https://taskapi.buildingindiadigital.com/clients', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -380,7 +406,6 @@ const TasksPage = ({ userData, onLogout }) => {
       const clientsData = await clientsResponse.json();
       setClients(clientsData);
 
-      // Fetch employees
       const employeesResponse = await fetch('https://taskapi.buildingindiadigital.com/employees', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -407,15 +432,12 @@ const TasksPage = ({ userData, onLogout }) => {
   }, [userData]);
 
   useEffect(() => {
-    // Apply filters
     let result = tasks;
     
-    // Filter out tasks older than 30 days unless showOlderTasks is true
     if (!showOlderTasks) {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       
-      // First try to filter based on due_date
       result = result.filter(task => {
         const taskDate = new Date(task.due_date);
         return taskDate >= thirtyDaysAgo;
@@ -446,12 +468,10 @@ const TasksPage = ({ userData, onLogout }) => {
     setSearchTerm(e.target.value);
   };
 
-  // New function to toggle showing older tasks
   const toggleShowOlderTasks = () => {
     setShowOlderTasks(!showOlderTasks);
   };
 
-  // For employee to submit task report - updated with work location
   const handleReportSubmit = async (e) => {
     e.preventDefault();
     
@@ -469,7 +489,6 @@ const TasksPage = ({ userData, onLogout }) => {
         throw new Error('Failed to submit task report');
       }
 
-      // Close modal and refresh tasks
       setShowReportModal(false);
       setSelectedTask(null);
       setReportForm({
@@ -485,7 +504,6 @@ const TasksPage = ({ userData, onLogout }) => {
     }
   };
 
-  // For allocator to update task status
   const handleStatusUpdate = async (e) => {
     e.preventDefault();
     
@@ -503,7 +521,6 @@ const TasksPage = ({ userData, onLogout }) => {
         throw new Error('Failed to update task status');
       }
 
-      // Close modal and refresh tasks
       setShowUpdateStatusModal(false);
       setSelectedTask(null);
       setStatusUpdateForm({
@@ -517,7 +534,6 @@ const TasksPage = ({ userData, onLogout }) => {
     }
   };
 
-  // For allocator to create new task
   const handleCreateTask = async (e) => {
     e.preventDefault();
     
@@ -535,7 +551,6 @@ const TasksPage = ({ userData, onLogout }) => {
         throw new Error('Failed to create task');
       }
 
-      // Close modal and refresh tasks
       setShowCreateTaskModal(false);
       setCreateTaskForm({
         client_id: '',
@@ -615,7 +630,6 @@ const TasksPage = ({ userData, onLogout }) => {
     }
   };
 
-  // Helper function to show work location icon
   const getWorkLocationIcon = (location) => {
     return location === 'home' ? (
       <FontAwesomeIcon icon={faHome} className="text-purple-500 mr-1" title="Work from Home" />
@@ -624,7 +638,6 @@ const TasksPage = ({ userData, onLogout }) => {
     );
   };
 
-  // Helper function to get month name
   const getMonthName = (month) => {
     return new Date(0, month - 1).toLocaleString('default', { month: 'long' });
   };
@@ -633,7 +646,6 @@ const TasksPage = ({ userData, onLogout }) => {
     if (userData.role === 'allocator') {
       return (
         <div>
-          {/* Allocator Weekly Sheets */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
             <h3 className="text-xl font-semibold text-gray-800 mb-4 md:mb-0">
               Weekly Sheets Management
@@ -656,7 +668,6 @@ const TasksPage = ({ userData, onLogout }) => {
             </div>
           </div>
 
-          {/* Submitted Sheets for Review */}
           {submittedSheets.length > 0 && (
             <div className="mb-8">
               <h4 className="text-lg font-medium text-gray-800 mb-3">Submitted Sheets (Pending Review)</h4>
@@ -703,7 +714,6 @@ const TasksPage = ({ userData, onLogout }) => {
             </div>
           )}
 
-          {/* All Sheets */}
           <div>
             <h4 className="text-lg font-medium text-gray-800 mb-3">All Weekly Sheets</h4>
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -768,7 +778,6 @@ const TasksPage = ({ userData, onLogout }) => {
         </div>
       );
     } else {
-      // Employee Weekly Sheets
       return (
         <div>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
@@ -777,7 +786,6 @@ const TasksPage = ({ userData, onLogout }) => {
             </h3>
           </div>
 
-          {/* Current Month Sheet */}
           {currentMonthSheet && (
             <div className="mb-8 p-4 border rounded bg-blue-50">
               <h4 className="text-lg font-semibold mb-2">Current Month Sheet</h4>
@@ -810,7 +818,6 @@ const TasksPage = ({ userData, onLogout }) => {
             </div>
           )}
 
-          {/* All My Sheets */}
           <div>
             <h4 className="text-lg font-medium text-gray-800 mb-3">All My Sheets</h4>
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -927,7 +934,6 @@ const TasksPage = ({ userData, onLogout }) => {
                   Tasks
                 </h2>
                 
-                {/* Create Task button for allocators */}
                 {userData.role === 'allocator' && (
                   <button
                     onClick={() => setShowCreateTaskModal(true)}
@@ -1186,7 +1192,7 @@ const TasksPage = ({ userData, onLogout }) => {
         </div>
       )}
 
-      {/* Weekly Sheet Editor Modal */}
+      {/* FIXED: Weekly Sheet Editor Modal */}
       {showSheetEditorModal && selectedSheet && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-6xl mx-4 max-h-screen overflow-y-auto">
@@ -1194,13 +1200,23 @@ const TasksPage = ({ userData, onLogout }) => {
               <h3 className="text-lg font-medium text-gray-900">
                 <FontAwesomeIcon icon={faTable} className="mr-2" />
                 Weekly Sheet - {getMonthName(selectedSheet.month)} {selectedSheet.year}
+                {selectedSheet.assignee && (
+                  <span className="text-sm text-gray-500 ml-2">
+                    (Assigned to: {selectedSheet.assignee.username})
+                  </span>
+                )}
               </h3>
               <div className="flex gap-2">
-                {userData.role === 'employee' && selectedSheet.status !== 'submitted' && selectedSheet.created_by === selectedSheet.assigned_to && (
+                {/* Show save button based on user permissions */}
+                {((userData.role === 'employee' && 
+                   selectedSheet.status !== 'submitted' && 
+                   selectedSheet.created_by === selectedSheet.assigned_to) ||
+                  (userData.role === 'allocator')) && (
                   <button 
                     onClick={saveSheetChanges}
                     className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
                   >
+                    <FontAwesomeIcon icon={faCheck} className="mr-1" />
                     Save Changes
                   </button>
                 )}
@@ -1211,6 +1227,14 @@ const TasksPage = ({ userData, onLogout }) => {
                   Close
                 </button>
               </div>
+            </div>
+
+            {/* Debug info - can be removed in production */}
+            <div className="mb-4 p-2 bg-gray-100 rounded text-xs">
+              <p>Sheet Status: {selectedSheet.status}</p>
+              <p>Entries Count: {sheetEntries.length}</p>
+              <p>Can Edit: {userData.role === 'allocator' ? 'Yes (Allocator)' : 
+                           (selectedSheet.status !== 'submitted' && selectedSheet.created_by === selectedSheet.assigned_to) ? 'Yes' : 'No'}</p>
             </div>
 
             {/* Sheet Table */}
@@ -1244,9 +1268,17 @@ const TasksPage = ({ userData, onLogout }) => {
                     <tr key={client}>
                       <td className="border border-gray-300 p-2 font-medium">{client}</td>
                       {[1, 2, 3, 4, 5].map(week => {
-                        const entry = sheetEntries.find(e => e.client_name === client && e.week_number === week);
+                        // Find entry - handle both cases
+                        const entry = sheetEntries.find(e => 
+                          e.client_name === client && e.week_number === week
+                        );
+                        
+                        // Determine if field should be read-only
                         const isReadOnly = userData.role === 'allocator' ? false : 
                           (selectedSheet.status === 'submitted' || selectedSheet.created_by !== selectedSheet.assigned_to);
+                        
+                        // Create unique identifier for this cell
+                        const entryKey = entry?.id || `${client}-${week}`;
                         
                         return (
                           <React.Fragment key={week}>
@@ -1254,9 +1286,9 @@ const TasksPage = ({ userData, onLogout }) => {
                               <input
                                 type="number"
                                 value={entry?.posts_count || 0}
-                                onChange={(e) => updateSheetEntry(entry?.id, 'posts_count', parseInt(e.target.value))}
+                                onChange={(e) => updateSheetEntry(entryKey, 'posts_count', e.target.value)}
                                 readOnly={isReadOnly}
-                                className="w-full text-center border-none outline-none"
+                                className={`w-full text-center border-none outline-none ${isReadOnly ? 'bg-gray-100' : 'bg-white'}`}
                                 min="0"
                               />
                             </td>
@@ -1264,9 +1296,9 @@ const TasksPage = ({ userData, onLogout }) => {
                               <input
                                 type="number"
                                 value={entry?.reels_count || 0}
-                                onChange={(e) => updateSheetEntry(entry?.id, 'reels_count', parseInt(e.target.value))}
+                                onChange={(e) => updateSheetEntry(entryKey, 'reels_count', e.target.value)}
                                 readOnly={isReadOnly}
-                                className="w-full text-center border-none outline-none"
+                                className={`w-full text-center border-none outline-none ${isReadOnly ? 'bg-gray-100' : 'bg-white'}`}
                                 min="0"
                               />
                             </td>
@@ -1274,9 +1306,9 @@ const TasksPage = ({ userData, onLogout }) => {
                               <input
                                 type="text"
                                 value={entry?.story_description || ""}
-                                onChange={(e) => updateSheetEntry(entry?.id, 'story_description', e.target.value)}
+                                onChange={(e) => updateSheetEntry(entryKey, 'story_description', e.target.value)}
                                 readOnly={isReadOnly}
-                                className="w-full text-center border-none outline-none text-xs"
+                                className={`w-full text-center border-none outline-none text-xs ${isReadOnly ? 'bg-gray-100' : 'bg-white'}`}
                                 placeholder="Story description"
                               />
                             </td>
@@ -1467,7 +1499,6 @@ const TasksPage = ({ userData, onLogout }) => {
                 />
               </div>
 
-              {/* Added Work Location Selection */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Work Location
