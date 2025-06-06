@@ -98,7 +98,7 @@ const RegisterPage = () => {
           <span>
             <span style={{ color: '#FF6600' }}>B</span>
             <span style={{ color: '#1E3A8A' }}>i</span>
-            <span style={{ color: '#22C55E' }}>d</span>
+            <span style={{ color: '#22C55E' }}>D</span>
           </span>
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400 ml-1">
             Task Allocator
