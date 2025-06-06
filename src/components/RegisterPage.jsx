@@ -1,298 +1,306 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import logo from "../assets/images/bid.png";
-// Import FontAwesome
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faUser, 
-  faMapMarkerAlt, 
-  faUserTag, 
-  faIdCard, 
+  faEnvelope, 
   faLock, 
+  faUserPlus, 
   faEye, 
   faEyeSlash,
-  faUserPlus 
-} from "@fortawesome/free-solid-svg-icons";
+  faUserTag
+} from '@fortawesome/free-solid-svg-icons';
+import illustrationImage from '../assets/images/illustration.png';
 
-const Register = () => {
+const RegisterPage = () => {
   const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
-    state: "",
-    role: "",
-    password: "",
+    username: '',
+    email: '',
+    password: '',
+    confirm_password: '',
+    role: ''
   });
-  const [aadhaarCardFile, setAadhaarCardFile] = useState(null);
-  const [states, setStates] = useState([]);
-  const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState({
+    password: false,
+    confirm_password: false
+  });
   const navigate = useNavigate();
-
-  // Fetch states from the backend
-  useEffect(() => {
-    const fetchStates = async () => {
-      try {
-        const response = await axios.get("auth/states");
-        if (response.data.success) {
-          setStates(response.data.data);
-        }
-      } catch (err) {
-        console.error("Failed to fetch states:", err);
-      }
-    };
-    fetchStates();
-  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData({
+      ...formData,
+      [name]: value
+    });
   };
 
-  const handleFileChange = (e) => {
-    setAadhaarCardFile(e.target.files[0]);
-  };
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+  const togglePasswordVisibility = (field) => {
+    setShowPassword(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const formDataObj = new FormData();
-      formDataObj.append("first_name", formData.first_name);
-      formDataObj.append("last_name", formData.last_name);
-      formDataObj.append("state", formData.state);
-      formDataObj.append("role", formData.role);
-      formDataObj.append("password", formData.password);
-      formDataObj.append("aadhaar_card", aadhaarCardFile);
+    setIsLoading(true);
+    setError('');
+    setSuccess('');
 
-      const response = await axios.post("/auth/register", formDataObj, {
+    // Basic password validation
+    if (formData.password !== formData.confirm_password) {
+      setError('Passwords do not match');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('https://taskapi.buildingindiadigital.com/register', {
+        method: 'POST',
         headers: {
-          "Content-Type": "multipart/form-data",
+          'Content-Type': 'application/json'
         },
+        body: JSON.stringify(formData)
       });
 
-      console.log("Backend response:", response.data);
+      const data = await response.json();
 
-      if (response.data.success) {
-        navigate("/login");
-      } else {
-        setError(response.data.message || "Registration failed. Please try again.");
+      if (!response.ok) {
+        throw new Error(data.detail || 'Registration failed');
       }
-    } catch (err) {
-      console.error("Registration failed:", err);
-      if (err.response && err.response.data) {
-        console.log("Error response:", err.response.data);
-        setError(err.response.data.detail?.message || "Registration failed. Please check your input.");
-      } else {
-        setError("Registration failed. Please try again.");
-      }
+
+      setSuccess('Registration successful! Redirecting to login...');
+      
+      // Redirect to login page after 2 seconds
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
+    } catch (error) {
+      console.error('Registration error:', error);
+      setError(error.message || 'Registration failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FF9933] to-[#FFFFFF] p-4 sm:p-6 md:p-8">
-      <div className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl bg-white shadow-2xl rounded-2xl border border-[#FF9933] overflow-hidden transform transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_20px_60px_-10px_rgba(255,153,51,0.3)]">
-        <div className="grid md:grid-cols-2">
-          {/* Left Side - Decorative Background */}
-          <div className="hidden md:flex bg-gradient-to-br from-[#FF9933] to-[#138808] opacity-90 items-center justify-center p-8">
-            <div className="text-center text-white">
-              <h2 className="text-3xl font-bold mb-4">Create Your Account</h2>
-              <p className="text-lg mb-6">Join BID Admission and start your journey</p>
-              <img 
-                src={logo} 
-                alt="BID Admission Logo" 
-                className="mx-auto max-h-32 object-contain"
-              />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex flex-col items-center justify-center p-4">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-700/20 via-slate-900/50 to-slate-900"></div>
+      
+      {/* Bid Task Allocator Heading */}
+      <div className="relative z-10 text-center mb-6">
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+          <span>
+            <span style={{ color: '#FF6600' }}>B</span>
+            <span style={{ color: '#1E3A8A' }}>i</span>
+            <span style={{ color: '#22C55E' }}>d</span>
+          </span>
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400 ml-1">
+            Task Allocator
+          </span>
+        </h1>
+      </div>
+
+      {/* Main Container */}
+      <div className="relative z-10 w-full max-w-4xl mx-auto">
+        <div className="bg-slate-800/80 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-slate-700/50">
+          <div className="flex flex-col lg:flex-row min-h-[450px]">
+            
+            {/* Left Side - Illustration */}
+            <div className="lg:w-1/2 bg-gradient-to-br from-purple-600 to-blue-700 p-6 lg:p-8 flex flex-col justify-center items-center relative overflow-hidden">
+              {/* Background decoration */}
+              <div className="absolute inset-0 bg-[url(data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E)] opacity-30"></div>
+              
+              {/* Illustration Image */}
+              <div className="relative z-10 w-full max-w-xs mx-auto mb-6">
+                <img 
+                  src={illustrationImage} 
+                  alt="Registration Illustration" 
+                  className="w-full h-auto object-contain drop-shadow-2xl"
+                />
+              </div>
+              
+              {/* Welcome Text */}
+              <div className="text-center text-white relative z-10">
+                <h2 className="text-xl lg:text-2xl font-bold mb-3">Join Our Platform</h2>
+                <p className="text-purple-100 text-sm lg:text-base opacity-90">Create your account and start managing tasks efficiently</p>
+              </div>
             </div>
-          </div>
 
-          {/* Right Side - Registration Form */}
-          <div className="p-6 sm:p-8 md:p-10 space-y-6">
-            {/* Mobile Logo */}
-            <div className="md:hidden flex justify-center mb-6">
-              <img 
-                src={logo} 
-                alt="BID Admission Logo" 
-                className="max-h-24 object-contain"
-              />
-            </div>
-            
-            <h2 className="text-2xl sm:text-3xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-[#FF9933] to-[#138808]">
-              Create Your Account
-            </h2>
-            
-            {error && (
-              <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-lg animate-bounce">
-                <p>{error}</p>
-              </div>
-            )}
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-                  <div className="relative">
-                    <FontAwesomeIcon 
-                      icon={faUser} 
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#FF9933]" 
-                    />
-                    <input
-                      type="text"
-                      name="first_name"
-                      value={formData.first_name}
-                      onChange={handleChange}
-                      className="w-full pl-10 p-3 border rounded-lg focus:ring-2 focus:ring-[#FF9933] focus:border-[#138808] transition duration-300 hover:border-[#138808]"
-                      placeholder="Enter first name"
-                      required
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-                  <div className="relative">
-                    <FontAwesomeIcon 
-                      icon={faUser} 
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#FF9933]" 
-                    />
-                    <input
-                      type="text"
-                      name="last_name"
-                      value={formData.last_name}
-                      onChange={handleChange}
-                      className="w-full pl-10 p-3 border rounded-lg focus:ring-2 focus:ring-[#FF9933] focus:border-[#138808] transition duration-300 hover:border-[#138808]"
-                      placeholder="Enter last name"
-                      required
-                    />
-                  </div>
-                </div>
+            {/* Right Side - Registration Form */}
+            <div className="lg:w-1/2 p-6 lg:p-8 flex flex-col justify-center">
+              {/* Header */}
+              <div className="text-center mb-6">
+                <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">REGISTER</h1>
+                <p className="text-slate-400 text-sm">Create your new account</p>
               </div>
 
-              {/* State Dropdown */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
-                <div className="relative">
-                  <FontAwesomeIcon 
-                    icon={faMapMarkerAlt} 
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#FF9933]" 
-                  />
-                  <select
-                    name="state"
-                    value={formData.state}
-                    onChange={handleChange}
-                    className="w-full pl-10 p-3 border rounded-lg focus:ring-2 focus:ring-[#FF9933] focus:border-[#138808] transition duration-300 hover:border-[#138808] appearance-none"
-                    required
-                  >
-                    <option value="" disabled>Select your state</option>
-                    {states.map((state) => (
-                      <option key={state.id} value={state.name}>
-                        {state.name}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
-                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+              {/* Error Message */}
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-lg mb-4 backdrop-blur-sm">
+                  <div className="flex items-center">
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
+                    <p className="text-xs font-medium">{error}</p>
                   </div>
                 </div>
-              </div>
+              )}
 
-              {/* Role Dropdown */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
-                <div className="relative">
-                  <FontAwesomeIcon 
-                    icon={faUserTag} 
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#FF9933]" 
-                  />
-                  <select
-                    name="role"
-                    value={formData.role}
-                    onChange={handleChange}
-                    className="w-full pl-10 p-3 border rounded-lg focus:ring-2 focus:ring-[#FF9933] focus:border-[#138808] transition duration-300 hover:border-[#138808] appearance-none"
-                    required
-                  >
-                    <option value="" disabled>Select your role</option>
-                    <option value="student">Student</option>
-                    <option value="teacher">Teacher</option>
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
-                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+              {/* Success Message */}
+              {success && (
+                <div className="bg-green-500/10 border border-green-500/30 text-green-400 p-3 rounded-lg mb-4 backdrop-blur-sm">
+                  <div className="flex items-center">
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
+                    <p className="text-xs font-medium">{success}</p>
                   </div>
                 </div>
-              </div>
+              )}
 
-              {/* Password Input */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Username Input */}
                 <div className="relative">
-                  <FontAwesomeIcon 
-                    icon={faLock} 
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#FF9933]" 
-                  />
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FontAwesomeIcon icon={faUser} className="text-slate-400 text-sm" />
+                  </div>
                   <input
-                    type={showPassword ? "text" : "password"}
+                    name="username"
+                    type="text"
+                    className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-3 pl-10 pr-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm text-sm"
+                    placeholder="USERNAME"
+                    value={formData.username}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                {/* Email Input */}
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FontAwesomeIcon icon={faEnvelope} className="text-slate-400 text-sm" />
+                  </div>
+                  <input
+                    name="email"
+                    type="email"
+                    className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-3 pl-10 pr-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm text-sm"
+                    placeholder="EMAIL"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                {/* Password Input */}
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FontAwesomeIcon icon={faLock} className="text-slate-400 text-sm" />
+                  </div>
+                  <input
                     name="password"
+                    type={showPassword.password ? "text" : "password"}
+                    className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-3 pl-10 pr-10 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm text-sm"
+                    placeholder="PASSWORD"
                     value={formData.password}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-10 p-3 border rounded-lg focus:ring-2 focus:ring-[#FF9933] focus:border-[#138808] transition duration-300 hover:border-[#138808]"
-                    placeholder="Create a strong password"
                     required
                   />
                   <button
                     type="button"
-                    onClick={togglePasswordVisibility}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#FF9933] hover:text-[#138808] focus:outline-none"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white focus:outline-none"
+                    onClick={() => togglePasswordVisibility('password')}
+                    tabIndex="-1"
                   >
-                    <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                    <FontAwesomeIcon icon={showPassword.password ? faEyeSlash : faEye} className="text-sm" />
                   </button>
                 </div>
-              </div>
 
-              {/* Aadhaar Card Upload */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Aadhaar Card</label>
-                <div className="relative border-2 border-dashed border-[#FF9933] rounded-lg p-4 bg-[#FFFFFF] hover:bg-[#F0F0F0] transition duration-300 group">
-                  <FontAwesomeIcon 
-                    icon={faIdCard} 
-                    className="absolute left-4 top-6 text-[#FF9933] group-hover:text-[#138808]" 
-                  />
+                {/* Confirm Password Input */}
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FontAwesomeIcon icon={faLock} className="text-slate-400 text-sm" />
+                  </div>
                   <input
-                    type="file"
-                    name="aadhaar_card"
-                    onChange={handleFileChange}
-                    className="w-full pl-10 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#FF9933] file:text-white hover:file:bg-[#FF7F00]"
+                    name="confirm_password"
+                    type={showPassword.confirm_password ? "text" : "password"}
+                    className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-3 pl-10 pr-10 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm text-sm"
+                    placeholder="CONFIRM PASSWORD"
+                    value={formData.confirm_password}
+                    onChange={handleChange}
                     required
                   />
-                  <p className="text-xs text-gray-500 mt-2 pl-10">Upload a clear image of your Aadhaar card</p>
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white focus:outline-none"
+                    onClick={() => togglePasswordVisibility('confirm_password')}
+                    tabIndex="-1"
+                  >
+                    <FontAwesomeIcon icon={showPassword.confirm_password ? faEyeSlash : faEye} className="text-sm" />
+                  </button>
                 </div>
-              </div>
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                className="w-full bg-gradient-to-r from-[#FF9933] to-[#138808] text-white py-3 rounded-lg hover:from-[#FF7F00] hover:to-[#007F3D] transition duration-300 transform hover:scale-105 flex items-center justify-center space-x-2"
-              >
-                <FontAwesomeIcon icon={faUserPlus} />
-                <span>Create Account</span>
-              </button>
-            </form>
-            
-            <div className="text-center mt-6">
-              <p className="text-gray-600">
-                Already have an account?{" "}
+                {/* Role Selection */}
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FontAwesomeIcon icon={faUserTag} className="text-slate-400 text-sm" />
+                  </div>
+                  <select
+                    name="role"
+                    className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-3 pl-10 pr-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm appearance-none text-sm"
+                    value={formData.role}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="" className="bg-slate-800">SELECT ROLE</option>
+                    <option value="employee" className="bg-slate-800">Employee</option>
+                    <option value="allocator" className="bg-slate-800">Allocator</option>
+                    <option value="client" className="bg-slate-800">Client</option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                    <svg className="w-3 h-3 fill-current" viewBox="0 0 20 20">
+                      <path d="M7 7l3-3 3 3m0 6l-3 3-3-3" strokeWidth="1.5" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Submit Button */}
                 <button
-                  onClick={() => navigate("/login")}
-                  className="text-[#FF9933] font-bold hover:underline"
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-500/50 transition-all duration-300 transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm"
+                  disabled={isLoading}
                 >
-                  Login here
+                  {isLoading ? (
+                    <div className="flex items-center justify-center">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                      <span>CREATING ACCOUNT...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center">
+                      <FontAwesomeIcon icon={faUserPlus} className="mr-2 text-sm" />
+                      <span>REGISTER</span>
+                    </div>
+                  )}
                 </button>
-              </p>
+
+                {/* Login Link */}
+                <div className="text-center pt-3">
+                  <p className="text-slate-400 text-sm">
+                    Already have an account?{' '}
+                    <Link 
+                      to="/" 
+                      className="text-purple-400 hover:text-purple-300 font-medium transition-colors duration-300 hover:underline"
+                    >
+                      SIGN IN
+                    </Link>
+                  </p>
+                </div>
+              </form>
             </div>
           </div>
         </div>
@@ -301,4 +309,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default RegisterPage;
