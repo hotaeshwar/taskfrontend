@@ -7,7 +7,10 @@ import {
   faCheckCircle,
   faTimesCircle,
   faHourglassHalf,
-  faClipboardCheck
+  faClipboardCheck,
+  faPlus,
+  faTrash,
+  faEdit
 } from '@fortawesome/free-solid-svg-icons';
 import Sidebar from './Sidebar';
 import Header from './Header';
@@ -24,6 +27,13 @@ const ClientsPage = ({ userData, onLogout }) => {
   const [showClientDetails, setShowClientDetails] = useState(false);
   const [clientTasks, setClientTasks] = useState([]);
   const [isLoadingTasks, setIsLoadingTasks] = useState(false);
+  
+  // New states for add/delete functionality
+  const [showAddClientModal, setShowAddClientModal] = useState(false);
+  const [newClientName, setNewClientName] = useState('');
+  const [isAddingClient, setIsAddingClient] = useState(false);
+  const [isDeletingClient, setIsDeletingClient] = useState(false);
+  const [deleteConfirmClient, setDeleteConfirmClient] = useState(null);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -59,7 +69,7 @@ const ClientsPage = ({ userData, onLogout }) => {
     setIsLoadingTasks(true);
     
     try {
-      const response = await fetch(`'https://taskapi.buildingindiadigital.com/tasks/client/${clientId}'`, {
+      const response = await fetch(`https://taskapi.buildingindiadigital.com/tasks/client/${clientId}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -75,6 +85,74 @@ const ClientsPage = ({ userData, onLogout }) => {
       console.error('Error fetching client tasks:', error);
     } finally {
       setIsLoadingTasks(false);
+    }
+  };
+
+  // New function to add client
+  const handleAddClient = async () => {
+    if (!newClientName.trim()) {
+      setError('Client name cannot be empty');
+      return;
+    }
+
+    setIsAddingClient(true);
+    setError('');
+
+    try {
+      const response = await fetch('https://taskapi.buildingindiadigital.com/clients/add', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: newClientName.trim() })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to add client');
+      }
+
+      const newClient = await response.json();
+      setClients(prev => [...prev, newClient]);
+      setNewClientName('');
+      setShowAddClientModal(false);
+      setError('');
+    } catch (error) {
+      console.error('Error adding client:', error);
+      setError(error.message);
+    } finally {
+      setIsAddingClient(false);
+    }
+  };
+
+  // New function to delete client
+  const handleDeleteClient = async (clientId) => {
+    setIsDeletingClient(true);
+    setError('');
+
+    try {
+      const response = await fetch(`https://taskapi.buildingindiadigital.com/clients/delete/${clientId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to delete client');
+      }
+
+      // Remove client from state
+      setClients(prev => prev.filter(client => client.id !== clientId));
+      setDeleteConfirmClient(null);
+      setError('');
+    } catch (error) {
+      console.error('Error deleting client:', error);
+      setError(error.message);
+    } finally {
+      setIsDeletingClient(false);
     }
   };
 
@@ -161,12 +239,35 @@ const ClientsPage = ({ userData, onLogout }) => {
         <Header userData={userData} toggleSidebar={toggleSidebar} />
         
         <main className="flex-grow p-3 sm:p-4 lg:p-6 transition-all">
-          <h2 className="text-2xl sm:text-3xl font-bold text-indigo-700 dark:text-indigo-400 mb-6 flex items-center">
-            <div className="p-2 rounded-md bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300 mr-3">
-              <FontAwesomeIcon icon={faBuilding} />
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
+            <h2 className="text-2xl sm:text-3xl font-bold text-indigo-700 dark:text-indigo-400 flex items-center">
+              <div className="p-2 rounded-md bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300 mr-3">
+                <FontAwesomeIcon icon={faBuilding} />
+              </div>
+              Clients
+            </h2>
+            
+            {/* Add Client Button - Only show for allocators */}
+            {userData?.role === 'allocator' && (
+              <button
+                onClick={() => setShowAddClientModal(true)}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all flex items-center"
+              >
+                <FontAwesomeIcon icon={faPlus} className="mr-2" />
+                Add Client
+              </button>
+            )}
+          </div>
+          
+          {/* Error Display */}
+          {error && (
+            <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-6 py-4 rounded-lg shadow-md mb-6">
+              <div className="flex items-center">
+                <FontAwesomeIcon icon={faTimesCircle} className="mr-3 text-red-500" />
+                <span className="font-medium">{error}</span>
+              </div>
             </div>
-            Clients
-          </h2>
+          )}
           
           {/* Search */}
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-6 border border-gray-200 dark:border-gray-700 transition-all hover:shadow-xl">
@@ -187,13 +288,6 @@ const ClientsPage = ({ userData, onLogout }) => {
             <div className="flex justify-center items-center h-64">
               <Loader />
             </div>
-          ) : error ? (
-            <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-6 py-4 rounded-lg shadow-md animate-pulse">
-              <div className="flex items-center">
-                <FontAwesomeIcon icon={faTimesCircle} className="mr-3 text-red-500" />
-                <span className="font-medium">{error}</span>
-              </div>
-            </div>
           ) : filteredClients.length === 0 ? (
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center border border-gray-200 dark:border-gray-700">
               <FontAwesomeIcon icon={faBuilding} className="text-gray-400 dark:text-gray-500 text-5xl mb-4" />
@@ -207,20 +301,38 @@ const ClientsPage = ({ userData, onLogout }) => {
               {filteredClients.map((client) => (
                 <div 
                   key={client.id} 
-                  className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-5 hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 dark:border-gray-700 transform hover:-translate-y-1"
-                  onClick={() => handleClientClick(client)}
+                  className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-5 hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 transform hover:-translate-y-1"
                 >
-                  <div className="flex items-center">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-xl shadow-md">
-                      <FontAwesomeIcon icon={faBuilding} />
+                  <div className="flex items-center justify-between">
+                    <div 
+                      className="flex items-center cursor-pointer flex-grow"
+                      onClick={() => handleClientClick(client)}
+                    >
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-xl shadow-md">
+                        <FontAwesomeIcon icon={faBuilding} />
+                      </div>
+                      <div className="ml-4">
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{client.name}</h3>
+                        <p className="text-sm text-indigo-500 dark:text-indigo-300 flex items-center mt-1">
+                          <FontAwesomeIcon icon={faTasks} className="mr-1" />
+                          Click to view tasks
+                        </p>
+                      </div>
                     </div>
-                    <div className="ml-4">
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{client.name}</h3>
-                      <p className="text-sm text-indigo-500 dark:text-indigo-300 flex items-center mt-1">
-                        <FontAwesomeIcon icon={faTasks} className="mr-1" />
-                        Click to view tasks
-                      </p>
-                    </div>
+                    
+                    {/* Delete Button - Only show for allocators */}
+                    {userData?.role === 'allocator' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteConfirmClient(client);
+                        }}
+                        className="ml-2 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-all"
+                        title="Delete client"
+                      >
+                        <FontAwesomeIcon icon={faTrash} />
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -228,6 +340,100 @@ const ClientsPage = ({ userData, onLogout }) => {
           )}
         </main>
       </div>
+      
+      {/* Add Client Modal */}
+      {showAddClientModal && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-3">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 w-full max-w-md border border-gray-200 dark:border-gray-700">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Add New Client</h3>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Client Name
+              </label>
+              <input
+                type="text"
+                value={newClientName}
+                onChange={(e) => setNewClientName(e.target.value)}
+                placeholder="Enter client name"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                disabled={isAddingClient}
+              />
+            </div>
+            
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowAddClientModal(false);
+                  setNewClientName('');
+                  setError('');
+                }}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-all"
+                disabled={isAddingClient}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddClient}
+                disabled={isAddingClient}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              >
+                {isAddingClient ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <FontAwesomeIcon icon={faPlus} className="mr-2" />
+                    Add Client
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmClient && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-3">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 w-full max-w-md border border-gray-200 dark:border-gray-700">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Delete Client</h3>
+            
+            <p className="text-gray-700 dark:text-gray-300 mb-6">
+              Are you sure you want to delete <strong>{deleteConfirmClient.name}</strong>? This action cannot be undone.
+            </p>
+            
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setDeleteConfirmClient(null)}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-all"
+                disabled={isDeletingClient}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteClient(deleteConfirmClient.id)}
+                disabled={isDeletingClient}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              >
+                {isDeletingClient ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <FontAwesomeIcon icon={faTrash} className="mr-2" />
+                    Delete
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Client Details Modal */}
       {showClientDetails && selectedClient && (
