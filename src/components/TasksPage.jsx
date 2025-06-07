@@ -76,7 +76,7 @@ const TasksPage = ({ userData, onLogout }) => {
   const [submittedSheets, setSubmittedSheets] = useState([]);
   const [currentMonthSheet, setCurrentMonthSheet] = useState(null);
 
-  const CLIENT_LIST = ["DND", "LOD", "FANTASIA", "BROADWAY", "MDB", "CHAHAL", "XAU", "FINSYNC", "AMEY", "BiD"];
+  // const CLIENT_LIST = ["DND", "LOD", "FANTASIA", "BROADWAY", "MDB", "CHAHAL", "XAU", "FINSYNC", "AMEY", "BiD"];
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -85,7 +85,7 @@ const TasksPage = ({ userData, onLogout }) => {
   const fetchTasks = async () => {
     setIsLoading(true);
     setError('');
-    
+
     try {
       const response = await fetch('https://taskapi.buildingindiadigital.com/tasks', {
         headers: {
@@ -111,7 +111,7 @@ const TasksPage = ({ userData, onLogout }) => {
   // WEEKLY SHEET FUNCTIONS
   const fetchWeeklySheets = async () => {
     try {
-      const endpoint = userData.role === 'allocator' 
+      const endpoint = userData.role === 'allocator'
         ? 'https://taskapi.buildingindiadigital.com/allocators/weekly-sheets'
         : 'https://taskapi.buildingindiadigital.com/employees/weekly-sheets';
 
@@ -167,13 +167,13 @@ const TasksPage = ({ userData, onLogout }) => {
 
   const createWeeklySheet = async (e) => {
     e.preventDefault();
-    
+
     try {
       const entries = [];
-      CLIENT_LIST.forEach(client => {
+      clients.forEach(client => {
         for (let week = 1; week <= 5; week++) {
           entries.push({
-            client_name: client,
+            client_name: client.name, // Use client.name instead of client directly
             week_number: week,
             posts_count: 1,
             reels_count: 1,
@@ -310,10 +310,10 @@ const TasksPage = ({ userData, onLogout }) => {
   // FIXED: Improved openSheetEditor function with better error handling
   const openSheetEditor = async (sheet) => {
     console.log('Opening sheet editor for:', sheet);
-    
+
     try {
       setSelectedSheet(sheet);
-      
+
       // Initialize entries based on what we have
       if (sheet.entries && Array.isArray(sheet.entries) && sheet.entries.length > 0) {
         console.log('Using existing entries:', sheet.entries.length);
@@ -322,11 +322,11 @@ const TasksPage = ({ userData, onLogout }) => {
         console.log('Creating default entries for all clients and weeks');
         // Create default structure for all clients and weeks
         const defaultEntries = [];
-        CLIENT_LIST.forEach(client => {
+        clients.forEach(client => {
           for (let week = 1; week <= 5; week++) {
             defaultEntries.push({
-              id: `temp-${client}-${week}`, // Temporary ID for new entries
-              client_name: client,
+              id: `temp-${client.name}-${week}`, // Use client.name
+              client_name: client.name, // Use client.name
               week_number: week,
               posts_count: 0,
               reels_count: 0,
@@ -337,7 +337,7 @@ const TasksPage = ({ userData, onLogout }) => {
         });
         setSheetEntries(defaultEntries);
       }
-      
+
       // Clear any previous errors
       setError('');
       setShowSheetEditorModal(true);
@@ -350,11 +350,11 @@ const TasksPage = ({ userData, onLogout }) => {
   // FIXED: Improved updateSheetEntry function
   const updateSheetEntry = (entryIdentifier, field, value) => {
     console.log('Updating entry:', entryIdentifier, field, value);
-    
+
     setSheetEntries(prevEntries => {
       return prevEntries.map(entry => {
         let matches = false;
-        
+
         // Handle different types of identifiers
         if (typeof entryIdentifier === 'number') {
           matches = entry.id === entryIdentifier;
@@ -371,7 +371,7 @@ const TasksPage = ({ userData, onLogout }) => {
             matches = entry.id.toString() === entryIdentifier.toString();
           }
         }
-        
+
         if (matches) {
           const updatedEntry = { ...entry };
           if (field.includes('_count')) {
@@ -382,7 +382,7 @@ const TasksPage = ({ userData, onLogout }) => {
           console.log('Updated entry:', updatedEntry);
           return updatedEntry;
         }
-        
+
         return entry;
       });
     });
@@ -401,8 +401,8 @@ const TasksPage = ({ userData, onLogout }) => {
 
     try {
       setError(''); // Clear previous errors
-      
-      const updates = { 
+
+      const updates = {
         entries: sheetEntries.map(entry => {
           const cleanEntry = {
             client_name: entry.client_name,
@@ -411,19 +411,19 @@ const TasksPage = ({ userData, onLogout }) => {
             reels_count: parseInt(entry.reels_count) || 0,
             story_description: entry.story_description || ""
           };
-          
+
           // Only include ID if it's not a temporary ID
           if (entry.id && !entry.id.toString().startsWith('temp-')) {
             cleanEntry.id = entry.id;
           }
-          
+
           return cleanEntry;
         })
       };
 
       console.log('Sending updates:', updates);
 
-      const endpoint = userData.role === 'allocator' 
+      const endpoint = userData.role === 'allocator'
         ? `https://taskapi.buildingindiadigital.com/allocators/weekly-sheets/${selectedSheet.sheet_id}`
         : `https://taskapi.buildingindiadigital.com/employees/weekly-sheets/${selectedSheet.sheet_id}`;
 
@@ -444,7 +444,7 @@ const TasksPage = ({ userData, onLogout }) => {
 
       const result = await response.json();
       console.log('Save successful:', result);
-      
+
       alert('Changes saved successfully!');
       setShowSheetEditorModal(false);
       fetchWeeklySheets();
@@ -456,7 +456,7 @@ const TasksPage = ({ userData, onLogout }) => {
 
   // Helper function to find entry for a specific client and week
   const findEntryForCell = (client, week) => {
-    return sheetEntries.find(entry => 
+    return sheetEntries.find(entry =>
       entry.client_name === client && entry.week_number === week
     );
   };
@@ -467,9 +467,8 @@ const TasksPage = ({ userData, onLogout }) => {
     return entry?.id || `temp-${client}-${week}`;
   };
 
+  // Update your existing fetchClientsAndEmployees function to also fetch for employees:
   const fetchClientsAndEmployees = async () => {
-    if (userData.role !== 'allocator') return;
-    
     try {
       const clientsResponse = await fetch('https://taskapi.buildingindiadigital.com/clients', {
         headers: {
@@ -484,57 +483,57 @@ const TasksPage = ({ userData, onLogout }) => {
       const clientsData = await clientsResponse.json();
       setClients(clientsData);
 
-      const employeesResponse = await fetch('https://taskapi.buildingindiadigital.com/employees', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+      // Keep existing employee fetching logic for allocators
+      if (userData.role === 'allocator') {
+        const employeesResponse = await fetch('https://taskapi.buildingindiadigital.com/employees', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+
+        if (!employeesResponse.ok) {
+          throw new Error('Failed to fetch employees');
         }
-      });
 
-      if (!employeesResponse.ok) {
-        throw new Error('Failed to fetch employees');
+        const employeesData = await employeesResponse.json();
+        setEmployees(employeesData);
       }
-
-      const employeesData = await employeesResponse.json();
-      setEmployees(employeesData);
     } catch (error) {
       console.error('Error fetching clients and employees:', error);
     }
-  };
-
+  }; 
   useEffect(() => {
     fetchTasks();
     fetchWeeklySheets();
-    if (userData.role === 'allocator') {
-      fetchClientsAndEmployees();
-    }
+    fetchClientsAndEmployees(); // Call for all users now, not just allocators
   }, [userData]);
 
   useEffect(() => {
     let result = tasks;
-    
+
     if (!showOlderTasks) {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
+
       result = result.filter(task => {
         const taskDate = new Date(task.due_date);
         return taskDate >= thirtyDaysAgo;
       });
     }
-    
+
     if (statusFilter) {
       result = result.filter(task => task.status === statusFilter);
     }
-    
+
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
-      result = result.filter(task => 
-        task.title.toLowerCase().includes(search) || 
+      result = result.filter(task =>
+        task.title.toLowerCase().includes(search) ||
         task.description.toLowerCase().includes(search) ||
         task.client.name.toLowerCase().includes(search)
       );
     }
-    
+
     setFilteredTasks(result);
   }, [statusFilter, searchTerm, tasks, showOlderTasks]);
 
@@ -552,7 +551,7 @@ const TasksPage = ({ userData, onLogout }) => {
 
   const handleReportSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       const response = await fetch(`https://taskapi.buildingindiadigital.com/tasks/${selectedTask.id}/report`, {
         method: 'POST',
@@ -584,7 +583,7 @@ const TasksPage = ({ userData, onLogout }) => {
 
   const handleStatusUpdate = async (e) => {
     e.preventDefault();
-    
+
     try {
       const response = await fetch(`https://taskapi.buildingindiadigital.com/tasks/${selectedTask.id}/status`, {
         method: 'PUT',
@@ -614,7 +613,7 @@ const TasksPage = ({ userData, onLogout }) => {
 
   const handleCreateTask = async (e) => {
     e.preventDefault();
-    
+
     try {
       const response = await fetch('https://taskapi.buildingindiadigital.com/tasks', {
         method: 'POST',
@@ -763,21 +762,21 @@ const TasksPage = ({ userData, onLogout }) => {
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        <button 
+                        <button
                           onClick={() => openSheetEditor(sheet)}
                           className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                         >
                           <FontAwesomeIcon icon={faEye} className="mr-1" />
                           View
                         </button>
-                        <button 
+                        <button
                           onClick={() => updateSheetStatus(sheet.sheet_id, 'approved')}
                           className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
                         >
                           <FontAwesomeIcon icon={faCheck} className="mr-1" />
                           Approve
                         </button>
-                        <button 
+                        <button
                           onClick={() => updateSheetStatus(sheet.sheet_id, 'rejected')}
                           className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                         >
@@ -876,7 +875,7 @@ const TasksPage = ({ userData, onLogout }) => {
                 </div>
                 <div className="flex gap-2">
                   {currentMonthSheet.status === 'draft' && currentMonthSheet.created_by !== currentMonthSheet.assigned_to && (
-                    <button 
+                    <button
                       onClick={() => copySheetForEmployee(currentMonthSheet.sheet_id)}
                       className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
                     >
@@ -884,7 +883,7 @@ const TasksPage = ({ userData, onLogout }) => {
                       Start Working
                     </button>
                   )}
-                  <button 
+                  <button
                     onClick={() => openSheetEditor(currentMonthSheet)}
                     className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                   >
@@ -935,7 +934,7 @@ const TasksPage = ({ userData, onLogout }) => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           {sheet.status === 'draft' && sheet.created_by === sheet.assigned_to && (
-                            <button 
+                            <button
                               onClick={() => submitEmployeeSheet(sheet.sheet_id)}
                               className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 mr-2"
                             >
@@ -943,7 +942,7 @@ const TasksPage = ({ userData, onLogout }) => {
                               Submit
                             </button>
                           )}
-                          <button 
+                          <button
                             onClick={() => openSheetEditor(sheet)}
                             className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                           >
@@ -965,38 +964,36 @@ const TasksPage = ({ userData, onLogout }) => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Sidebar 
-        userData={userData} 
-        onLogout={onLogout} 
-        isSidebarOpen={isSidebarOpen} 
-        toggleSidebar={toggleSidebar} 
+      <Sidebar
+        userData={userData}
+        onLogout={onLogout}
+        isSidebarOpen={isSidebarOpen}
+        toggleSidebar={toggleSidebar}
       />
-      
+
       <div className="lg:ml-64 min-h-screen flex flex-col">
         <Header userData={userData} toggleSidebar={toggleSidebar} />
-        
+
         <main className="flex-grow p-4 lg:p-6">
           {/* Tab Navigation */}
           <div className="mb-6">
             <nav className="flex space-x-8" aria-label="Tabs">
               <button
                 onClick={() => setActiveTab('tasks')}
-                className={`${
-                  activeTab === 'tasks'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm`}
+                className={`${activeTab === 'tasks'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm`}
               >
                 <FontAwesomeIcon icon={faTasks} className="mr-2" />
                 Tasks
               </button>
               <button
                 onClick={() => setActiveTab('weekly-sheets')}
-                className={`${
-                  activeTab === 'weekly-sheets'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm`}
+                className={`${activeTab === 'weekly-sheets'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm`}
               >
                 <FontAwesomeIcon icon={faTable} className="mr-2" />
                 Weekly Sheets
@@ -1009,7 +1006,7 @@ const TasksPage = ({ userData, onLogout }) => {
             <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
               <div className="flex justify-between items-center">
                 <span>{error}</span>
-                <button 
+                <button
                   onClick={() => setError('')}
                   className="text-red-900 hover:text-red-700 ml-4"
                 >
@@ -1026,7 +1023,7 @@ const TasksPage = ({ userData, onLogout }) => {
                   <FontAwesomeIcon icon={faTasks} className="mr-2" />
                   Tasks
                 </h2>
-                
+
                 {userData.role === 'allocator' && (
                   <button
                     onClick={() => setShowCreateTaskModal(true)}
@@ -1037,7 +1034,7 @@ const TasksPage = ({ userData, onLogout }) => {
                   </button>
                 )}
               </div>
-              
+
               {/* Filters and Search */}
               <div className="bg-white rounded-lg shadow-md p-4 mb-6">
                 <div className="flex flex-col md:flex-row md:items-center md:space-x-4">
@@ -1090,7 +1087,7 @@ const TasksPage = ({ userData, onLogout }) => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Tasks List */}
               {isLoading ? (
                 <div className="flex justify-center items-center h-64">
@@ -1103,7 +1100,7 @@ const TasksPage = ({ userData, onLogout }) => {
                   <p className="text-gray-500">
                     {!showOlderTasks
                       ? "No recent tasks found. Try enabling 'Show tasks older than 30 days' to see older tasks."
-                      : statusFilter 
+                      : statusFilter
                         ? `No ${statusFilter} tasks match your search criteria.`
                         : searchTerm
                           ? 'No tasks match your search criteria.'
@@ -1168,7 +1165,7 @@ const TasksPage = ({ userData, onLogout }) => {
                                   Submit Report
                                 </button>
                               )}
-                              
+
                               {userData.role === 'allocator' && task.status === 'completed' && (
                                 <button
                                   onClick={() => openUpdateStatusModal(task)}
@@ -1198,7 +1195,7 @@ const TasksPage = ({ userData, onLogout }) => {
           )}
         </main>
       </div>
-      
+
       {/* Create Weekly Sheet Modal for Allocators */}
       {showCreateSheetModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
@@ -1207,7 +1204,7 @@ const TasksPage = ({ userData, onLogout }) => {
               <FontAwesomeIcon icon={faPlus} className="mr-2" />
               Create Weekly Sheet
             </h3>
-            
+
             <form onSubmit={createWeeklySheet}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1215,25 +1212,25 @@ const TasksPage = ({ userData, onLogout }) => {
                 </label>
                 <select
                   value={createSheetForm.month}
-                  onChange={(e) => setCreateSheetForm({...createSheetForm, month: parseInt(e.target.value)})}
+                  onChange={(e) => setCreateSheetForm({ ...createSheetForm, month: parseInt(e.target.value) })}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 >
-                  {Array.from({length: 12}, (_, i) => (
-                    <option key={i+1} value={i+1}>
-                      {getMonthName(i+1)}
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <option key={i + 1} value={i + 1}>
+                      {getMonthName(i + 1)}
                     </option>
                   ))}
                 </select>
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Year
                 </label>
                 <select
                   value={createSheetForm.year}
-                  onChange={(e) => setCreateSheetForm({...createSheetForm, year: parseInt(e.target.value)})}
+                  onChange={(e) => setCreateSheetForm({ ...createSheetForm, year: parseInt(e.target.value) })}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 >
@@ -1242,14 +1239,14 @@ const TasksPage = ({ userData, onLogout }) => {
                   <option value={2026}>2026</option>
                 </select>
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Assign To Employee (Optional)
                 </label>
                 <select
                   value={createSheetForm.assigned_to}
-                  onChange={(e) => setCreateSheetForm({...createSheetForm, assigned_to: e.target.value})}
+                  onChange={(e) => setCreateSheetForm({ ...createSheetForm, assigned_to: e.target.value })}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Create as Template</option>
@@ -1260,7 +1257,7 @@ const TasksPage = ({ userData, onLogout }) => {
                   ))}
                 </select>
               </div>
-              
+
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   type="button"
@@ -1297,19 +1294,19 @@ const TasksPage = ({ userData, onLogout }) => {
               </h3>
               <div className="flex gap-2">
                 {/* Show save button based on user permissions */}
-                {((userData.role === 'employee' && 
-                   selectedSheet.status !== 'submitted' && 
-                   selectedSheet.created_by === selectedSheet.assigned_to) ||
+                {((userData.role === 'employee' &&
+                  selectedSheet.status !== 'submitted' &&
+                  selectedSheet.created_by === selectedSheet.assigned_to) ||
                   (userData.role === 'allocator')) && (
-                  <button 
-                    onClick={saveSheetChanges}
-                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                  >
-                    <FontAwesomeIcon icon={faCheck} className="mr-1" />
-                    Save Changes
-                  </button>
-                )}
-                <button 
+                    <button
+                      onClick={saveSheetChanges}
+                      className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                    >
+                      <FontAwesomeIcon icon={faCheck} className="mr-1" />
+                      Save Changes
+                    </button>
+                  )}
+                <button
                   onClick={() => setShowSheetEditorModal(false)}
                   className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
                 >
@@ -1323,24 +1320,23 @@ const TasksPage = ({ userData, onLogout }) => {
               <div className="mb-4 p-2 bg-gray-100 rounded text-xs">
                 <p>Sheet Status: {selectedSheet.status}</p>
                 <p>Entries Count: {sheetEntries.length}</p>
-                <p>Can Edit: {userData.role === 'allocator' ? 'Yes (Allocator)' : 
-                             (selectedSheet.status !== 'submitted' && selectedSheet.created_by === selectedSheet.assigned_to) ? 'Yes' : 'No'}</p>
+                <p>Can Edit: {userData.role === 'allocator' ? 'Yes (Allocator)' :
+                  (selectedSheet.status !== 'submitted' && selectedSheet.created_by === selectedSheet.assigned_to) ? 'Yes' : 'No'}</p>
                 <p>Sheet ID: {selectedSheet.sheet_id}</p>
               </div>
             )}
-
             {/* Check if we have entries to display */}
             {sheetEntries.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-gray-500 mb-4">No entries found. Click below to create default entries.</p>
-                <button 
+                <button
                   onClick={() => {
                     const defaultEntries = [];
-                    CLIENT_LIST.forEach(client => {
+                    clients.forEach(client => {
                       for (let week = 1; week <= 5; week++) {
                         defaultEntries.push({
-                          id: `temp-${client}-${week}`,
-                          client_name: client,
+                          id: `temp-${client.name}-${week}`,
+                          client_name: client.name,
                           week_number: week,
                           posts_count: 0,
                           reels_count: 0,
@@ -1384,20 +1380,20 @@ const TasksPage = ({ userData, onLogout }) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {CLIENT_LIST.map(client => (
-                      <tr key={client}>
-                        <td className="border border-gray-300 p-2 font-medium">{client}</td>
+                    {clients.map(client => (
+                      <tr key={client.name}>
+                        <td className="border border-gray-300 p-2 font-medium">{client.name}</td>
                         {[1, 2, 3, 4, 5].map(week => {
                           // Find entry for this client and week
-                          const entry = findEntryForCell(client, week);
-                          
+                          const entry = findEntryForCell(client.name, week);
+
                           // Determine if field should be read-only
-                          const isReadOnly = userData.role === 'allocator' ? false : 
+                          const isReadOnly = userData.role === 'allocator' ? false :
                             (selectedSheet.status === 'submitted' || selectedSheet.created_by !== selectedSheet.assigned_to);
-                          
+
                           // Get entry key for updates
-                          const entryKey = getEntryKey(client, week);
-                          
+                          const entryKey = getEntryKey(client.name, week);
+
                           return (
                             <React.Fragment key={week}>
                               <td className="border border-gray-300 p-1">
@@ -1449,7 +1445,7 @@ const TasksPage = ({ userData, onLogout }) => {
               <FontAwesomeIcon icon={faPlus} className="mr-2" />
               Create New Task
             </h3>
-            
+
             <form onSubmit={handleCreateTask}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1457,7 +1453,7 @@ const TasksPage = ({ userData, onLogout }) => {
                 </label>
                 <select
                   value={createTaskForm.client_id}
-                  onChange={(e) => setCreateTaskForm({...createTaskForm, client_id: e.target.value})}
+                  onChange={(e) => setCreateTaskForm({ ...createTaskForm, client_id: e.target.value })}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 >
@@ -1469,14 +1465,14 @@ const TasksPage = ({ userData, onLogout }) => {
                   ))}
                 </select>
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Assigned To
                 </label>
                 <select
                   value={createTaskForm.employee_id}
-                  onChange={(e) => setCreateTaskForm({...createTaskForm, employee_id: e.target.value})}
+                  onChange={(e) => setCreateTaskForm({ ...createTaskForm, employee_id: e.target.value })}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 >
@@ -1488,7 +1484,7 @@ const TasksPage = ({ userData, onLogout }) => {
                   ))}
                 </select>
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Title
@@ -1496,25 +1492,25 @@ const TasksPage = ({ userData, onLogout }) => {
                 <input
                   type="text"
                   value={createTaskForm.title}
-                  onChange={(e) => setCreateTaskForm({...createTaskForm, title: e.target.value})}
+                  onChange={(e) => setCreateTaskForm({ ...createTaskForm, title: e.target.value })}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Description
                 </label>
                 <textarea
                   value={createTaskForm.description}
-                  onChange={(e) => setCreateTaskForm({...createTaskForm, description: e.target.value})}
+                  onChange={(e) => setCreateTaskForm({ ...createTaskForm, description: e.target.value })}
                   rows="3"
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 ></textarea>
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Due Date
@@ -1522,24 +1518,24 @@ const TasksPage = ({ userData, onLogout }) => {
                 <input
                   type="datetime-local"
                   value={createTaskForm.due_date}
-                  onChange={(e) => setCreateTaskForm({...createTaskForm, due_date: e.target.value})}
+                  onChange={(e) => setCreateTaskForm({ ...createTaskForm, due_date: e.target.value })}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Completion Instructions (Optional)
                 </label>
                 <textarea
                   value={createTaskForm.completion_instructions}
-                  onChange={(e) => setCreateTaskForm({...createTaskForm, completion_instructions: e.target.value})}
+                  onChange={(e) => setCreateTaskForm({ ...createTaskForm, completion_instructions: e.target.value })}
                   rows="2"
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 ></textarea>
               </div>
-              
+
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   type="button"
@@ -1559,7 +1555,7 @@ const TasksPage = ({ userData, onLogout }) => {
           </div>
         </div>
       )}
-      
+
       {/* Submit Report Modal for Employees */}
       {showReportModal && selectedTask && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
@@ -1568,12 +1564,12 @@ const TasksPage = ({ userData, onLogout }) => {
               <FontAwesomeIcon icon={faFileAlt} className="mr-2" />
               Submit Task Report
             </h3>
-            
+
             <div className="mb-4 p-3 bg-gray-50 rounded-md">
               <h4 className="font-medium text-gray-800">{selectedTask.title}</h4>
               <p className="text-sm text-gray-600 mt-1">{selectedTask.description}</p>
             </div>
-            
+
             <form onSubmit={handleReportSubmit}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1581,26 +1577,26 @@ const TasksPage = ({ userData, onLogout }) => {
                 </label>
                 <textarea
                   value={reportForm.completion_description}
-                  onChange={(e) => setReportForm({...reportForm, completion_description: e.target.value})}
+                  onChange={(e) => setReportForm({ ...reportForm, completion_description: e.target.value })}
                   rows="3"
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 ></textarea>
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Hurdles Faced
                 </label>
                 <textarea
                   value={reportForm.hurdles_faced}
-                  onChange={(e) => setReportForm({...reportForm, hurdles_faced: e.target.value})}
+                  onChange={(e) => setReportForm({ ...reportForm, hurdles_faced: e.target.value })}
                   rows="2"
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 ></textarea>
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Hours Worked
@@ -1610,7 +1606,7 @@ const TasksPage = ({ userData, onLogout }) => {
                   min="0"
                   step="0.5"
                   value={reportForm.hours_worked}
-                  onChange={(e) => setReportForm({...reportForm, hours_worked: e.target.value})}
+                  onChange={(e) => setReportForm({ ...reportForm, hours_worked: e.target.value })}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
@@ -1628,7 +1624,7 @@ const TasksPage = ({ userData, onLogout }) => {
                       name="work_location"
                       value="office"
                       checked={reportForm.work_location === 'office'}
-                      onChange={() => setReportForm({...reportForm, work_location: 'office'})}
+                      onChange={() => setReportForm({ ...reportForm, work_location: 'office' })}
                     />
                     <span className="ml-2">Office <FontAwesomeIcon icon={faBuilding} className="ml-1 text-blue-500" /></span>
                   </label>
@@ -1639,13 +1635,13 @@ const TasksPage = ({ userData, onLogout }) => {
                       name="work_location"
                       value="home"
                       checked={reportForm.work_location === 'home'}
-                      onChange={() => setReportForm({...reportForm, work_location: 'home'})}
+                      onChange={() => setReportForm({ ...reportForm, work_location: 'home' })}
                     />
                     <span className="ml-2">Home <FontAwesomeIcon icon={faHome} className="ml-1 text-purple-500" /></span>
                   </label>
                 </div>
               </div>
-              
+
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   type="button"
@@ -1665,7 +1661,7 @@ const TasksPage = ({ userData, onLogout }) => {
           </div>
         </div>
       )}
-      
+
       {/* Task Review Modal for Allocators */}
       {showUpdateStatusModal && selectedTask && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
@@ -1674,12 +1670,12 @@ const TasksPage = ({ userData, onLogout }) => {
               <FontAwesomeIcon icon={faEdit} className="mr-2" />
               Review Task
             </h3>
-            
+
             <div className="mb-4 p-3 bg-gray-50 rounded-md">
               <h4 className="font-medium text-gray-800">{selectedTask.title}</h4>
               <p className="text-sm text-gray-600 mt-1">{selectedTask.description}</p>
             </div>
-            
+
             {selectedTask.report && (
               <div className="mb-4 p-3 bg-blue-50 rounded-md">
                 <h4 className="font-medium text-gray-800">Employee Report</h4>
@@ -1701,7 +1697,7 @@ const TasksPage = ({ userData, onLogout }) => {
                 </p>
               </div>
             )}
-            
+
             <form onSubmit={handleStatusUpdate}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1709,7 +1705,7 @@ const TasksPage = ({ userData, onLogout }) => {
                 </label>
                 <select
                   value={statusUpdateForm.status}
-                  onChange={(e) => setStatusUpdateForm({...statusUpdateForm, status: e.target.value})}
+                  onChange={(e) => setStatusUpdateForm({ ...statusUpdateForm, status: e.target.value })}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 >
@@ -1717,19 +1713,19 @@ const TasksPage = ({ userData, onLogout }) => {
                   <option value="rejected">Rejected</option>
                 </select>
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Feedback (Optional)
                 </label>
                 <textarea
                   value={statusUpdateForm.allocator_feedback}
-                  onChange={(e) => setStatusUpdateForm({...statusUpdateForm, allocator_feedback: e.target.value})}
+                  onChange={(e) => setStatusUpdateForm({ ...statusUpdateForm, allocator_feedback: e.target.value })}
                   rows="3"
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 ></textarea>
               </div>
-              
+
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   type="button"
