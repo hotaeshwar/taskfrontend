@@ -69,28 +69,28 @@ const EmployeesPage = ({ userData, onLogout }) => {
   };
 
   const fetchEmployeeTasks = async (employeeId) => {
-    setIsLoadingTasks(true);
-    
-    try {
-      const response = await fetch(`https://taskapi.buildingindiadigital.com/tasks?employee_id=${employeeId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch tasks');
+  setIsLoadingTasks(true);
+  
+  try {
+    // Fixed: Use the correct endpoint from your FastAPI backend
+    const response = await fetch(`https://taskapi.buildingindiadigital.com/tasks/employee/${employeeId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
+    });
 
-      const data = await response.json();
-      setEmployeeTasks(data);
-    } catch (error) {
-      console.error('Error fetching employee tasks:', error);
-    } finally {
-      setIsLoadingTasks(false);
+    if (!response.ok) {
+      throw new Error('Failed to fetch tasks');
     }
-  };
 
+    const data = await response.json();
+    setEmployeeTasks(data);
+  } catch (error) {
+    console.error('Error fetching employee tasks:', error);
+  } finally {
+    setIsLoadingTasks(false);
+  }
+};
   const fetchEmployeeSalary = async (employeeId) => {
     try {
       // Changed from GET to GET from employee's salary-history endpoint
