@@ -75,9 +75,6 @@ const TasksPage = ({ userData, onLogout }) => {
   });
   const [submittedSheets, setSubmittedSheets] = useState([]);
   const [currentMonthSheet, setCurrentMonthSheet] = useState(null);
-
-  // const CLIENT_LIST = ["DND", "LOD", "FANTASIA", "BROADWAY", "MDB", "CHAHAL", "XAU", "FINSYNC", "AMEY", "BiD"];
-
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -164,7 +161,6 @@ const TasksPage = ({ userData, onLogout }) => {
       setError('Failed to load weekly sheets. Please try again.');
     }
   };
-
   const createWeeklySheet = async (e) => {
     e.preventDefault();
 
@@ -306,37 +302,44 @@ const TasksPage = ({ userData, onLogout }) => {
       setError('Failed to update sheet status. Please try again.');
     }
   };
-
-  // FIXED: Improved openSheetEditor function with better error handling
+  // FIXED: Improved openSheetEditor function with complete client coverage
   const openSheetEditor = async (sheet) => {
     console.log('Opening sheet editor for:', sheet);
 
     try {
       setSelectedSheet(sheet);
 
-      // Initialize entries based on what we have
-      if (sheet.entries && Array.isArray(sheet.entries) && sheet.entries.length > 0) {
-        console.log('Using existing entries:', sheet.entries.length);
-        setSheetEntries([...sheet.entries]); // Create a copy
-      } else {
-        console.log('Creating default entries for all clients and weeks');
-        // Create default structure for all clients and weeks
-        const defaultEntries = [];
-        clients.forEach(client => {
-          for (let week = 1; week <= 5; week++) {
-            defaultEntries.push({
-              id: `temp-${client.name}-${week}`, // Use client.name
-              client_name: client.name, // Use client.name
+      // Create a complete matrix of entries for ALL clients and ALL weeks
+      const completeEntries = [];
+      
+      // First, create entries for all clients and all weeks
+      clients.forEach(client => {
+        for (let week = 1; week <= 5; week++) {
+          // Check if an entry already exists for this client/week combination
+          const existingEntry = sheet.entries?.find(entry => 
+            entry.client_name === client.name && entry.week_number === week
+          );
+          
+          if (existingEntry) {
+            // Use existing entry
+            completeEntries.push({ ...existingEntry });
+          } else {
+            // Create new entry for missing client/week combination
+            completeEntries.push({
+              id: `temp-${client.name}-${week}`,
+              client_name: client.name,
               week_number: week,
-              posts_count: 0,
-              reels_count: 0,
-              story_description: "COLLAGE + WTSAP STORY",
+              posts_count: 1, // Default value
+              reels_count: 1, // Default value
+              story_description: "COLLAGE", // Default editable value
               is_topical_day: false
             });
           }
-        });
-        setSheetEntries(defaultEntries);
-      }
+        }
+      });
+
+      console.log('Complete entries created:', completeEntries.length);
+      setSheetEntries(completeEntries);
 
       // Clear any previous errors
       setError('');
@@ -402,23 +405,36 @@ const TasksPage = ({ userData, onLogout }) => {
     try {
       setError(''); // Clear previous errors
 
-      const updates = {
-        entries: sheetEntries.map(entry => {
-          const cleanEntry = {
+      // Separate existing entries from new entries
+      const existingEntries = [];
+      const newEntries = [];
+
+      sheetEntries.forEach(entry => {
+        if (entry.id && !entry.id.toString().startsWith('temp-')) {
+          // Existing entry - include ID for update
+          existingEntries.push({
+            id: entry.id,
             client_name: entry.client_name,
             week_number: entry.week_number,
             posts_count: parseInt(entry.posts_count) || 0,
             reels_count: parseInt(entry.reels_count) || 0,
             story_description: entry.story_description || ""
-          };
+          });
+        } else {
+          // New entry - don't include temp ID
+          newEntries.push({
+            client_name: entry.client_name,
+            week_number: entry.week_number,
+            posts_count: parseInt(entry.posts_count) || 0,
+            reels_count: parseInt(entry.reels_count) || 0,
+            story_description: entry.story_description || "",
+            is_topical_day: entry.is_topical_day || false
+          });
+        }
+      });
 
-          // Only include ID if it's not a temporary ID
-          if (entry.id && !entry.id.toString().startsWith('temp-')) {
-            cleanEntry.id = entry.id;
-          }
-
-          return cleanEntry;
-        })
+      const updates = {
+        entries: [...existingEntries, ...newEntries]
       };
 
       console.log('Sending updates:', updates);
@@ -453,7 +469,6 @@ const TasksPage = ({ userData, onLogout }) => {
       setError(`Failed to save changes: ${error.message}`);
     }
   };
-
   // Helper function to find entry for a specific client and week
   const findEntryForCell = (client, week) => {
     return sheetEntries.find(entry =>
@@ -502,6 +517,7 @@ const TasksPage = ({ userData, onLogout }) => {
       console.error('Error fetching clients and employees:', error);
     }
   }; 
+
   useEffect(() => {
     fetchTasks();
     fetchWeeklySheets();
@@ -548,7 +564,6 @@ const TasksPage = ({ userData, onLogout }) => {
   const toggleShowOlderTasks = () => {
     setShowOlderTasks(!showOlderTasks);
   };
-
   const handleReportSubmit = async (e) => {
     e.preventDefault();
 
@@ -653,7 +668,6 @@ const TasksPage = ({ userData, onLogout }) => {
     setSelectedTask(task);
     setShowUpdateStatusModal(true);
   };
-
   const getStatusBadge = (status) => {
     switch (status) {
       case 'pending':
@@ -718,7 +732,6 @@ const TasksPage = ({ userData, onLogout }) => {
   const getMonthName = (month) => {
     return new Date(0, month - 1).toLocaleString('default', { month: 'long' });
   };
-
   const renderWeeklySheetContent = () => {
     if (userData.role === 'allocator') {
       return (
@@ -961,7 +974,6 @@ const TasksPage = ({ userData, onLogout }) => {
       );
     }
   };
-
   return (
     <div className="min-h-screen bg-gray-100">
       <Sidebar
@@ -1195,7 +1207,6 @@ const TasksPage = ({ userData, onLogout }) => {
           )}
         </main>
       </div>
-
       {/* Create Weekly Sheet Modal for Allocators */}
       {showCreateSheetModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
@@ -1278,10 +1289,10 @@ const TasksPage = ({ userData, onLogout }) => {
         </div>
       )}
 
-      {/* FIXED: Weekly Sheet Editor Modal */}
+      {/* ENHANCED: Weekly Sheet Editor Modal with Bigger Columns */}
       {showSheetEditorModal && selectedSheet && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-6xl mx-4 max-h-screen overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-7xl mx-4 max-h-screen overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-medium text-gray-900">
                 <FontAwesomeIcon icon={faTable} className="mr-2" />
@@ -1315,16 +1326,6 @@ const TasksPage = ({ userData, onLogout }) => {
               </div>
             </div>
 
-            {/* Debug info for development */}
-            {process.env.NODE_ENV === 'development' && (
-              <div className="mb-4 p-2 bg-gray-100 rounded text-xs">
-                <p>Sheet Status: {selectedSheet.status}</p>
-                <p>Entries Count: {sheetEntries.length}</p>
-                <p>Can Edit: {userData.role === 'allocator' ? 'Yes (Allocator)' :
-                  (selectedSheet.status !== 'submitted' && selectedSheet.created_by === selectedSheet.assigned_to) ? 'Yes' : 'No'}</p>
-                <p>Sheet ID: {selectedSheet.sheet_id}</p>
-              </div>
-            )}
             {/* Check if we have entries to display */}
             {sheetEntries.length === 0 ? (
               <div className="text-center py-8">
@@ -1338,9 +1339,9 @@ const TasksPage = ({ userData, onLogout }) => {
                           id: `temp-${client.name}-${week}`,
                           client_name: client.name,
                           week_number: week,
-                          posts_count: 0,
-                          reels_count: 0,
-                          story_description: "COLLAGE + WTSAP STORY",
+                          posts_count: 1,
+                          reels_count: 1,
+                          story_description: "COLLAGE",
                           is_topical_day: false
                         });
                       }
@@ -1353,36 +1354,40 @@ const TasksPage = ({ userData, onLogout }) => {
                 </button>
               </div>
             ) : (
-              /* Sheet Table */
+              /* ENHANCED Sheet Table with Bigger Columns */
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-gray-300">
+                <table className="w-full border-collapse border border-gray-300 text-sm">
                   <thead>
                     <tr>
-                      <th className="border border-gray-300 p-2 bg-gray-100">CLIENTS</th>
+                      <th className="border border-gray-300 p-4 bg-gray-100 font-bold text-gray-700 w-40">CLIENTS</th>
                       {[1, 2, 3, 4, 5].map(week => (
-                        <th key={week} className="border border-gray-300 p-2 bg-gray-100" colSpan="3">
-                          WEEK {week}
-                          <div className="text-xs text-gray-600">
-                            ({week === 1 ? '1-7' : week === 2 ? '8-14' : week === 3 ? '15-21' : week === 4 ? '22-28' : '29-30'})
+                        <th key={week} className="border border-gray-300 p-4 bg-gray-100 font-bold text-gray-700" colSpan="3">
+                          <div className="text-center">
+                            <div className="text-lg font-bold">WEEK {week}</div>
+                            <div className="text-xs text-gray-600 mt-1 font-normal">
+                              ({week === 1 ? '1-7' : week === 2 ? '8-14' : week === 3 ? '15-21' : week === 4 ? '22-28' : '29-30'})
+                            </div>
                           </div>
                         </th>
                       ))}
                     </tr>
                     <tr>
-                      <th className="border border-gray-300 p-2 bg-gray-50"></th>
+                      <th className="border border-gray-300 p-3 bg-gray-50"></th>
                       {[1, 2, 3, 4, 5].map(week => (
                         <React.Fragment key={week}>
-                          <th className="border border-gray-300 p-1 bg-gray-50 text-xs">POSTS</th>
-                          <th className="border border-gray-300 p-1 bg-gray-50 text-xs">REELS</th>
-                          <th className="border border-gray-300 p-1 bg-gray-50 text-xs">STORY</th>
+                          <th className="border border-gray-300 p-3 bg-gray-50 text-xs font-semibold text-gray-600 w-20">POSTS</th>
+                          <th className="border border-gray-300 p-3 bg-gray-50 text-xs font-semibold text-gray-600 w-20">REELS</th>
+                          <th className="border border-gray-300 p-3 bg-gray-50 text-xs font-semibold text-gray-600 w-48">STORY</th>
                         </React.Fragment>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {clients.map(client => (
-                      <tr key={client.name}>
-                        <td className="border border-gray-300 p-2 font-medium">{client.name}</td>
+                      <tr key={client.name} className="hover:bg-gray-50">
+                        <td className="border border-gray-300 p-4 font-semibold text-gray-800 bg-gray-50 sticky left-0">
+                          {client.name}
+                        </td>
                         {[1, 2, 3, 4, 5].map(week => {
                           // Find entry for this client and week
                           const entry = findEntryForCell(client.name, week);
@@ -1396,33 +1401,39 @@ const TasksPage = ({ userData, onLogout }) => {
 
                           return (
                             <React.Fragment key={week}>
-                              <td className="border border-gray-300 p-1">
+                              <td className="border border-gray-300 p-2">
                                 <input
                                   type="number"
                                   value={entry?.posts_count || 0}
                                   onChange={(e) => updateSheetEntry(entryKey, 'posts_count', e.target.value)}
                                   readOnly={isReadOnly}
-                                  className={`w-full text-center border-none outline-none ${isReadOnly ? 'bg-gray-100' : 'bg-white'}`}
+                                  className={`w-full text-center border-2 rounded-md p-2 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500 ${
+                                    isReadOnly ? 'bg-gray-100 border-gray-200' : 'bg-white border-gray-300 hover:border-blue-400'
+                                  }`}
                                   min="0"
                                 />
                               </td>
-                              <td className="border border-gray-300 p-1">
+                              <td className="border border-gray-300 p-2">
                                 <input
                                   type="number"
                                   value={entry?.reels_count || 0}
                                   onChange={(e) => updateSheetEntry(entryKey, 'reels_count', e.target.value)}
                                   readOnly={isReadOnly}
-                                  className={`w-full text-center border-none outline-none ${isReadOnly ? 'bg-gray-100' : 'bg-white'}`}
+                                  className={`w-full text-center border-2 rounded-md p-2 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500 ${
+                                    isReadOnly ? 'bg-gray-100 border-gray-200' : 'bg-white border-gray-300 hover:border-blue-400'
+                                  }`}
                                   min="0"
                                 />
                               </td>
-                              <td className="border border-gray-300 p-1">
+                              <td className="border border-gray-300 p-2">
                                 <input
                                   type="text"
                                   value={entry?.story_description || ""}
                                   onChange={(e) => updateSheetEntry(entryKey, 'story_description', e.target.value)}
                                   readOnly={isReadOnly}
-                                  className={`w-full text-center border-none outline-none text-xs ${isReadOnly ? 'bg-gray-100' : 'bg-white'}`}
+                                  className={`w-full text-center border-2 rounded-md p-3 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500 ${
+                                    isReadOnly ? 'bg-gray-100 border-gray-200' : 'bg-white border-gray-300 hover:border-blue-400'
+                                  }`}
                                   placeholder="Story description"
                                 />
                               </td>
@@ -1437,7 +1448,9 @@ const TasksPage = ({ userData, onLogout }) => {
             )}
           </div>
         </div>
-      )}{/* Create Task Modal for Allocators */}
+      )}
+
+      {/* Create Task Modal for Allocators */}
       {showCreateTaskModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
@@ -1750,4 +1763,3 @@ const TasksPage = ({ userData, onLogout }) => {
 };
 
 export default TasksPage;
-// repushed
