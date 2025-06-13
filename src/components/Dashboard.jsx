@@ -67,6 +67,7 @@ const Dashboard = ({ userData, onLogout }) => {
   const [expandedEmployeeDays, setExpandedEmployeeDays] = useState({});
   const [salaryVisible, setSalaryVisible] = useState(false);
   const [payrollVisible, setPayrollVisible] = useState(false);
+  const [showEmployeeDetails, setShowEmployeeDetails] = useState(false);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -696,7 +697,6 @@ const Dashboard = ({ userData, onLogout }) => {
                       </div>
                     </div>
                   )}
-                  {/* Add rest of allocator sections here if needed */}
                   {/* Employee Timesheet Viewer for Allocators */}
                   <div className="mb-6 sm:mb-8 animate-fadeIn">
                     <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 sm:mb-4 flex items-center">
@@ -865,6 +865,7 @@ const Dashboard = ({ userData, onLogout }) => {
                     )}
                   </div>
 
+                  {/* Enhanced Employee Work Status Section */}
                   <div className="mb-6 sm:mb-8 animate-fadeIn">
                     <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 sm:mb-4 flex items-center">
                       <div className="p-2 rounded-md bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 mr-3">
@@ -874,6 +875,7 @@ const Dashboard = ({ userData, onLogout }) => {
                     </h3>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6">
+                      {/* Currently Working Card - unchanged */}
                       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-5 border-t-4 border-green-500 hover:shadow-xl transition-shadow transform hover:-translate-y-1">
                         <div className="flex items-center justify-between mb-3 sm:mb-4">
                           <h4 className="font-semibold text-gray-700 dark:text-gray-200 text-sm sm:text-base">Currently Working</h4>
@@ -895,10 +897,22 @@ const Dashboard = ({ userData, onLogout }) => {
                         </div>
                       </div>
 
+                      {/* Enhanced Total Work Today Card - Now Expandable */}
                       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-5 border-t-4 border-blue-500 hover:shadow-xl transition-shadow transform hover:-translate-y-1">
                         <div className="flex items-center justify-between mb-3 sm:mb-4">
                           <h4 className="font-semibold text-gray-700 dark:text-gray-200 text-sm sm:text-base">Total Work Today</h4>
-                          <span className="px-2 sm:px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium">Today</span>
+                          <div className="flex items-center space-x-2">
+                            <span className="px-2 sm:px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium">Today</span>
+                            <button
+                              onClick={() => setShowEmployeeDetails(!showEmployeeDetails)}
+                              className="p-1 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                            >
+                              <FontAwesomeIcon
+                                icon={showEmployeeDetails ? faChevronUp : faChevronDown}
+                                className="text-blue-500 dark:text-blue-400 text-sm"
+                              />
+                            </button>
+                          </div>
                         </div>
                         <div className="flex items-center">
                           <div className="p-3 sm:p-4 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-500 dark:text-blue-300 mr-3 sm:mr-4">
@@ -915,7 +929,89 @@ const Dashboard = ({ userData, onLogout }) => {
                           </div>
                         </div>
                       </div>
+
+                      {/* Third card - Active Tasks */}
+                      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-5 border-t-4 border-purple-500 hover:shadow-xl transition-shadow transform hover:-translate-y-1">
+                        <div className="flex items-center justify-between mb-3 sm:mb-4">
+                          <h4 className="font-semibold text-gray-700 dark:text-gray-200 text-sm sm:text-base">Active Tasks</h4>
+                          <span className="px-2 sm:px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs font-medium">Live</span>
+                        </div>
+                        <div className="flex items-center">
+                          <div className="p-3 sm:p-4 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-500 dark:text-purple-300 mr-3 sm:mr-4">
+                            <FontAwesomeIcon icon={faClock} className="text-base sm:text-lg" />
+                          </div>
+                          <div>
+                            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Total active tasks</p>
+                            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100 bg-clip-text bg-gradient-to-br from-purple-500 to-pink-400">
+                              {dashboardData?.employee_work_data?.reduce((sum, emp) => sum + (emp.pending_tasks || 0), 0) || 0}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">across all employees</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
+
+                    {/* Employee Details Dropdown */}
+                    {showEmployeeDetails && dashboardData?.employee_work_data && (
+                      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700 animate-slideInDown">
+                        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                          <h5 className="text-sm font-medium text-gray-800 dark:text-gray-200 flex items-center">
+                            <FontAwesomeIcon icon={faUser} className="mr-2 text-blue-500" />
+                            Individual Employee Work Hours Today
+                          </h5>
+                        </div>
+                        <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                          {dashboardData.employee_work_data
+                            .sort((a, b) => (b.today_minutes_worked || 0) - (a.today_minutes_worked || 0))
+                            .map((employee) => (
+                              <div key={employee.employee_id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-3">
+                                    <div className="flex-shrink-0">
+                                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                                        <span className="text-white text-sm font-medium">
+                                          {employee.employee_name?.charAt(0) || 'U'}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                        {employee.employee_name}
+                                      </p>
+                                      <div className="flex items-center space-x-2 mt-1">
+                                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                          employee.is_working
+                                            ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
+                                        }`}>
+                                          <span className={`h-1.5 w-1.5 rounded-full mr-1 ${
+                                            employee.is_working ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
+                                          }`}></span>
+                                          {employee.is_working ? 'Working' : 'Offline'}
+                                        </span>
+                                        {employee.is_working && employee.clocked_in_since && (
+                                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                                            Since {new Date(employee.clocked_in_since).toLocaleTimeString()}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                                      {formatTimeSimple(employee.today_minutes_worked || 0)}
+                                    </p>
+                                    <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-1 space-x-3">
+                                      <span>Tasks: {employee.pending_tasks || 0}</span>
+                                      <span>Done: {employee.completed_tasks || 0}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="mb-6 sm:mb-8 animate-fadeIn">
@@ -1026,7 +1122,6 @@ const Dashboard = ({ userData, onLogout }) => {
                       </div>
                     </div>
                   )}
-
 
                   {/* NEW: Current Month Work Summary */}
                   <div className="mb-6 sm:mb-8 animate-fadeIn">
@@ -1172,7 +1267,7 @@ const Dashboard = ({ userData, onLogout }) => {
                                   </td>
                                 </tr>
                               ))}
-                              </tbody>
+                            </tbody>
                           </table>
                         </div>
                       </div>
