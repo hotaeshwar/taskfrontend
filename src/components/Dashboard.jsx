@@ -38,7 +38,7 @@ import Header from './Header';
 import Loader from './Loader';
 
 const Dashboard = ({ userData, onLogout }) => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
   const [clientTasks, setClientTasks] = useState({});
   const [employeeTasks, setEmployeeTasks] = useState({});
@@ -55,7 +55,6 @@ const Dashboard = ({ userData, onLogout }) => {
   const [showPayrollDetail, setShowPayrollDetail] = useState(false);
   const [timesheetStartDate, setTimesheetStartDate] = useState('');
   const [timesheetEndDate, setTimesheetEndDate] = useState('');
-  // State for allocator viewing employee timesheets
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
   const [selectedEmployeeName, setSelectedEmployeeName] = useState('');
   const [allocatorViewingEmployeeTimesheets, setAllocatorViewingEmployeeTimesheets] = useState(false);
@@ -63,15 +62,13 @@ const Dashboard = ({ userData, onLogout }) => {
   const [deleteBeforeDate, setDeleteBeforeDate] = useState('');
   const [employees, setEmployees] = useState([]);
   const [isDeleting, setIsDeleting] = useState(false);
-  
-  // States for collapsible timesheet entries
   const [expandedDays, setExpandedDays] = useState({});
   const [expandedEmployeeDays, setExpandedEmployeeDays] = useState({});
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  // Toggle function for employee timesheet day
   const toggleDayExpanded = (date) => {
     setExpandedDays(prev => ({
       ...prev,
@@ -79,7 +76,6 @@ const Dashboard = ({ userData, onLogout }) => {
     }));
   };
 
-  // Toggle function for allocator viewing employee timesheets
   const toggleEmployeeDayExpanded = (date) => {
     setExpandedEmployeeDays(prev => ({
       ...prev,
@@ -87,27 +83,24 @@ const Dashboard = ({ userData, onLogout }) => {
     }));
   };
   
-  // Initialize all days as expanded when data is loaded
   useEffect(() => {
     const initialExpandedState = {};
     timesheetData.forEach(day => {
-      initialExpandedState[day.date] = true; // Default to expanded
+      initialExpandedState[day.date] = true;
     });
     setExpandedDays(initialExpandedState);
   }, [timesheetData]);
 
-  // Initialize all employee days as expanded when data is loaded
   useEffect(() => {
     const initialExpandedState = {};
     employeeTimesheetData.forEach(day => {
-      initialExpandedState[day.date] = true; // Default to expanded
+      initialExpandedState[day.date] = true;
     });
     setExpandedEmployeeDays(initialExpandedState);
   }, [employeeTimesheetData]);
-  // Approval handler function
+
   const handleApprovalAction = async (employeeId, action) => {
     try {
-      // Get the authentication token from localStorage
       const token = localStorage.getItem('token');
       
       if (!token) {
@@ -122,7 +115,7 @@ const Dashboard = ({ userData, onLogout }) => {
         },
         body: JSON.stringify({
           employee_id: employeeId,
-          action: action // This should be either "approve" or "reject"
+          action: action
         })
       });
 
@@ -130,7 +123,6 @@ const Dashboard = ({ userData, onLogout }) => {
         throw new Error(`Failed to ${action} employee`);
       }
 
-      // Handle successful response
       const data = await response.json();
       console.log(`Employee ${action}d successfully:`, data);
       
@@ -145,7 +137,6 @@ const Dashboard = ({ userData, onLogout }) => {
         setPendingApprovals(pendingData);
       }
       
-      // Show success message
       alert(`Employee ${action}d successfully`);
       
     } catch (error) {
@@ -154,7 +145,6 @@ const Dashboard = ({ userData, onLogout }) => {
     }
   };
 
-  // Function to fetch all employees for allocator
   const fetchEmployees = async () => {
     try {
       const response = await fetch('https://taskapi.buildingindiadigital.com/employees', {
@@ -173,10 +163,10 @@ const Dashboard = ({ userData, onLogout }) => {
       console.error('Error fetching employees:', error);
     }
   };
-  // Function for allocator to view employee timesheets
+
   const fetchEmployeeTimesheets = async (employeeId, startDate = null, endDate = null) => {
     try {
-      let url =  `https://taskapi.buildingindiadigital.com/allocators/employee/${employeeId}/timesheets`;
+      let url = `https://taskapi.buildingindiadigital.com/allocators/employee/${employeeId}/timesheets`;
       const params = new URLSearchParams();
       
       if (startDate) params.append('start_date', startDate);
@@ -202,7 +192,6 @@ const Dashboard = ({ userData, onLogout }) => {
     }
   };
 
-  // Function for allocator to clear employee timesheets
   const clearEmployeeTimesheets = async (employeeId, beforeDate) => {
     if (!beforeDate || !employeeId) {
       showNotificationMessage('Please select a date and employee');
@@ -215,8 +204,7 @@ const Dashboard = ({ userData, onLogout }) => {
 
     setIsDeleting(true);
     try {
-      // FIXED: Pass before_date as a query parameter
-      const response = await fetch( `https://taskapi.buildingindiadigital.com/allocators/employee/${employeeId}/timesheets?before_date=${beforeDate}`, {
+      const response = await fetch(`https://taskapi.buildingindiadigital.com/allocators/employee/${employeeId}/timesheets?before_date=${beforeDate}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -230,7 +218,6 @@ const Dashboard = ({ userData, onLogout }) => {
       const data = await response.json();
       showNotificationMessage(data.message);
       
-      // Refresh the employee's timesheet data
       await fetchEmployeeTimesheets(employeeId, timesheetStartDate, timesheetEndDate);
     } catch (error) {
       console.error('Error clearing timesheet data:', error);
@@ -240,7 +227,6 @@ const Dashboard = ({ userData, onLogout }) => {
     }
   };
 
-  // Function for employee to delete their own old timesheets
   const deleteOwnTimesheets = async (beforeDate) => {
     if (!beforeDate) {
       showNotificationMessage('Please select a date');
@@ -253,35 +239,28 @@ const Dashboard = ({ userData, onLogout }) => {
 
     setIsDeleting(true);
     try {
-      // Make the DELETE request with the date as a query parameter
-      const response = await fetch( `https://taskapi.buildingindiadigital.com/employees/timesheets?before_date=${beforeDate}`, {
+      const response = await fetch(`https://taskapi.buildingindiadigital.com/employees/timesheets?before_date=${beforeDate}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
 
-      // Log the response for debugging
       console.log('Delete response status:', response.status);
       
       if (!response.ok) {
         throw new Error('Failed to delete timesheet data');
       }
 
-      // Parse the response
       const data = await response.json();
       console.log('Delete response data:', data);
       
-      // Show success message
       showNotificationMessage(data.message || 'Records deleted successfully');
       
-      // Force UI update by clearing the data
       setTimesheetData([]);
       
-      // Add a small delay before refreshing
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Fetch fresh data
       await fetchTimesheetData();
       
     } catch (error) {
@@ -291,124 +270,7 @@ const Dashboard = ({ userData, onLogout }) => {
       setIsDeleting(false);
     }
   };
-  // Function for allocator to view employee timesheets
-  const fetchEmployeeTimesheets = async (employeeId, startDate = null, endDate = null) => {
-    try {
-      let url =  `https://taskapi.buildingindiadigital.com/allocators/employee/${employeeId}/timesheets`;
-      const params = new URLSearchParams();
-      
-      if (startDate) params.append('start_date', startDate);
-      if (endDate) params.append('end_date', endDate);
-      
-      if (params.toString()) url += `?${params.toString()}`;
 
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch employee timesheet data');
-      }
-
-      const data = await response.json();
-      setEmployeeTimesheetData(data);
-    } catch (error) {
-      console.error('Error fetching employee timesheet data:', error);
-      setEmployeeTimesheetData([]);
-    }
-  };
-
-  // Function for allocator to clear employee timesheets
-  const clearEmployeeTimesheets = async (employeeId, beforeDate) => {
-    if (!beforeDate || !employeeId) {
-      showNotificationMessage('Please select a date and employee');
-      return;
-    }
-
-    if (!confirm(`Are you sure you want to delete all timesheet entries before ${beforeDate} for this employee?`)) {
-      return;
-    }
-
-    setIsDeleting(true);
-    try {
-      // FIXED: Pass before_date as a query parameter
-      const response = await fetch( `https://taskapi.buildingindiadigital.com/allocators/employee/${employeeId}/timesheets?before_date=${beforeDate}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to clear timesheet data');
-      }
-
-      const data = await response.json();
-      showNotificationMessage(data.message);
-      
-      // Refresh the employee's timesheet data
-      await fetchEmployeeTimesheets(employeeId, timesheetStartDate, timesheetEndDate);
-    } catch (error) {
-      console.error('Error clearing timesheet data:', error);
-      showNotificationMessage(`Error: ${error.message}`);
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  // Function for employee to delete their own old timesheets
-  const deleteOwnTimesheets = async (beforeDate) => {
-    if (!beforeDate) {
-      showNotificationMessage('Please select a date');
-      return;
-    }
-
-    if (!confirm(`Are you sure you want to delete all your timesheet entries before ${beforeDate}?`)) {
-      return;
-    }
-
-    setIsDeleting(true);
-    try {
-      // Make the DELETE request with the date as a query parameter
-      const response = await fetch( `https://taskapi.buildingindiadigital.com/employees/timesheets?before_date=${beforeDate}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      // Log the response for debugging
-      console.log('Delete response status:', response.status);
-      
-      if (!response.ok) {
-        throw new Error('Failed to delete timesheet data');
-      }
-
-      // Parse the response
-      const data = await response.json();
-      console.log('Delete response data:', data);
-      
-      // Show success message
-      showNotificationMessage(data.message || 'Records deleted successfully');
-      
-      // Force UI update by clearing the data
-      setTimesheetData([]);
-      
-      // Add a small delay before refreshing
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Fetch fresh data
-      await fetchTimesheetData();
-      
-    } catch (error) {
-      console.error('Error deleting timesheet data:', error);
-      showNotificationMessage(`Error: ${error.message}`);
-    } finally {
-      setIsDeleting(false);
-    }
-  };
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -441,7 +303,7 @@ const Dashboard = ({ userData, onLogout }) => {
     const diffMs = currentTime - clockIn;
     return Math.floor(diffMs / 60000);
   }, [currentTime]);
-  // Transform API data to match the expected format in your UI
+
   const fetchPayrollRecords = async () => {
     try {
       const response = await fetch('https://taskapi.buildingindiadigital.com/employees/payroll', {
@@ -455,22 +317,14 @@ const Dashboard = ({ userData, onLogout }) => {
       }
 
       const apiData = await response.json();
-      console.log('Raw API data:', apiData); // Log raw data for debugging
+      console.log('Raw API data:', apiData);
       
-      // Transform the data to match what your UI expects
       const transformedData = apiData.map(record => {
-        // Calculate values that UI expects based on API data
         const regular_hours = record.total_minutes / 60;
         const overtime_hours = record.overtime_minutes / 60;
         const gross_pay = record.calculated_salary;
-        
-        // Assume tax is 10% of gross for this example - adjust as needed
         const tax_deductions = gross_pay * 0.1;
-        
-        // Calculate net pay (you might need to adjust this based on your actual calculation)
         const net_pay = gross_pay - tax_deductions;
-        
-        // Get period name if available
         const pay_period = record.period ? record.period.name : `Period ${record.period_id}`;
         
         return {
@@ -482,10 +336,10 @@ const Dashboard = ({ userData, onLogout }) => {
           hourly_rate: record.hourly_rate,
           gross_pay: record.calculated_salary,
           tax_deductions: tax_deductions,
-          benefits_deductions: 0, // Set default or calculate if available
+          benefits_deductions: 0,
           other_deductions: record.undertime_deduction || 0,
           net_pay: net_pay,
-          payment_date: record.created_at, // Or use a specific payment date if available
+          payment_date: record.created_at,
           status: record.status
         };
       });
@@ -513,7 +367,6 @@ const Dashboard = ({ userData, onLogout }) => {
       const apiData = await response.json();
       console.log('Raw payroll detail:', apiData);
       
-      // Transform to match UI expectations
       const transformedData = {
         id: apiData.id,
         period_id: apiData.period_id,
@@ -522,13 +375,13 @@ const Dashboard = ({ userData, onLogout }) => {
         overtime_hours: (apiData.overtime_minutes / 60).toFixed(2),
         hourly_rate: apiData.hourly_rate,
         gross_pay: apiData.calculated_salary,
-        tax_deductions: apiData.calculated_salary * 0.1, // Example tax calculation
+        tax_deductions: apiData.calculated_salary * 0.1,
         benefits_deductions: 0,
         other_deductions: apiData.undertime_deduction || 0,
-        net_pay: apiData.calculated_salary * 0.9, // Example - adjust based on your deductions
+        net_pay: apiData.calculated_salary * 0.9,
         payment_date: apiData.created_at,
         status: apiData.status,
-        notes: "" // Add notes if available in API
+        notes: ""
       };
       
       console.log('Transformed detail:', transformedData);
@@ -538,6 +391,7 @@ const Dashboard = ({ userData, onLogout }) => {
       console.error('Error fetching payroll detail:', error);
     }
   };
+
   const fetchTimesheetData = async (startDate = null, endDate = null) => {
     try {
       let url = 'https://taskapi.buildingindiadigital.com/employees/timesheets';
@@ -578,7 +432,6 @@ const Dashboard = ({ userData, onLogout }) => {
     }, 5000);
   };
 
-  // FIXED: Removed useCallback and dependencies that were causing infinite loop
   const fetchDashboardData = async () => {
     setIsLoading(true);
     setError('');
@@ -599,7 +452,7 @@ const Dashboard = ({ userData, onLogout }) => {
       }
 
       const data = await response.json();
-      console.log('Dashboard API response:', data); // Debug log
+      console.log('Dashboard API response:', data);
       setDashboardData(data);
 
       if (userData?.role === 'employee') {
@@ -624,7 +477,6 @@ const Dashboard = ({ userData, onLogout }) => {
             }
           }
           
-          // Fetch employees for the allocator
           await fetchEmployees();
         } catch (error) {
           console.error('Error fetching pending approvals:', error);
@@ -638,7 +490,6 @@ const Dashboard = ({ userData, onLogout }) => {
     }
   };
 
-  // FIXED: Removed fetchDashboardData from dependency array to prevent infinite loop
   useEffect(() => {
     const fetchData = () => {
       if (userData) {
@@ -649,8 +500,8 @@ const Dashboard = ({ userData, onLogout }) => {
     fetchData();
     const intervalId = setInterval(fetchData, 30000);
     return () => clearInterval(intervalId);
-  }, [userData]); // ONLY userData dependency
-  // Collapsible Timesheet Day Component
+  }, [userData]);
+
   const TimesheetDay = ({ day, isExpanded, onToggle }) => (
     <div key={day.date} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden mb-4 transition-all duration-300">
       <div 
@@ -753,7 +604,7 @@ const Dashboard = ({ userData, onLogout }) => {
             </div>
           ) : dashboardData ? (
             <>
-            {userData.role === 'allocator' && (
+              {userData.role === 'allocator' && (
                 <>
                   {pendingApprovals.length > 0 && (
                     <div className="mb-6 sm:mb-8 animate-slideInUp">
@@ -793,157 +644,34 @@ const Dashboard = ({ userData, onLogout }) => {
                                       <div className="ml-3 sm:ml-4">
                                         <div className="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100">
                                           {request.employee_username}
-                                          {userData.role === 'employee' && (
-                <>
-                  {/* NEW: Current Salary Information Section */}
-                  {dashboardData?.current_salary && (
-                    <div className="mb-6 sm:mb-8 animate-fadeIn">
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 sm:mb-4 flex items-center">
-                        <div className="p-2 rounded-md bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 mr-3">
-                          <FontAwesomeIcon icon={faMoneyBillWave} />
-                        </div>
-                        Current Salary Information
-                      </h3>
-                      
-                      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 border border-gray-100 dark:border-gray-700">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-                            <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Monthly Salary</h4>
-                            <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                              {formatCurrency(dashboardData.current_salary.monthly_salary)}
-                            </p>
-                          </div>
-                          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-                            <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Currency</h4>
-                            <p className="text-xl font-semibold text-blue-600 dark:text-blue-400">
-                              {dashboardData.current_salary.currency}
-                            </p>
-                          </div>
-                          <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
-                            <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Effective From</h4>
-                            <p className="text-lg font-medium text-purple-600 dark:text-purple-400">
-                              {new Date(dashboardData.current_salary.effective_from).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* NEW: Current Month Work Summary */}
-                  <div className="mb-6 sm:mb-8 animate-fadeIn">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 sm:mb-4 flex items-center">
-                      <div className="p-2 rounded-md bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 mr-3">
-                        <FontAwesomeIcon icon={faCalculator} />
-                      </div>
-                      Current Month Work Summary
-                    </h3>
-                    
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 border border-gray-100 dark:border-gray-700">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                          <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Today's Work</h4>
-                          <p className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                            {formatTimeSimple(dashboardData?.today_minutes_worked || 0)}
-                          </p>
-                        </div>
-                        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-                          <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">This Week</h4>
-                          <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                            {formatTimeSimple(dashboardData?.week_minutes_worked || 0)}
-                          </p>
-                        </div>
-                        <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-                          <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">This Month</h4>
-                          <p className="text-xl font-bold text-green-600 dark:text-green-400">
-                            {formatTimeSimple(dashboardData?.month_minutes_worked || 0)}
-                          </p>
-                        </div>
-                        <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
-                          <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Work Status</h4>
-                          <div className="flex items-center">
-                            <span className={`inline-block h-3 w-3 rounded-full mr-2 ${
-                              dashboardData?.is_working ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
-                            }`}></span>
-                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              {dashboardData?.is_working ? 'Working' : 'Off Duty'}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* NEW: Payroll History Section */}
-                  {payrollRecords && payrollRecords.length > 0 && (
-                    <div className="mb-6 sm:mb-8 animate-fadeIn">
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 sm:mb-4 flex items-center">
-                        <div className="p-2 rounded-md bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 mr-3">
-                          <FontAwesomeIcon icon={faFileInvoiceDollar} />
-                        </div>
-                        Payroll History
-                      </h3>
-                      
-                      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700">
-                        <div className="overflow-x-auto">
-                          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead className="bg-gray-50 dark:bg-gray-900">
-                              <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                  Pay Period
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                  Hours
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                  Gross Pay
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                  Net Pay
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                  Status
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                  Action
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                              {payrollRecords.map((record) => (
-                                <tr key={record.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
-                                    {record.pay_period}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    <div>
-                                      <div>Regular: {record.regular_hours}h</div>
-                                      <div className="text-xs">Overtime: {record.overtime_hours}h</div>
+                                        </div>
+                                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                                          {request.employee_email}
+                                        </div>
+                                      </div>
                                     </div>
                                   </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                    {formatCurrency(record.gross_pay)}
+                                  <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                                    <span className="hidden sm:inline">{new Date(request.requested_at).toLocaleString()}</span>
+                                    <span className="sm:hidden">{new Date(request.requested_at).toLocaleDateString()}</span>
                                   </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600 dark:text-green-400">
-                                    {formatCurrency(record.net_pay)}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                      record.status === 'paid' 
-                                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                                    }`}>
-                                      {record.status}
-                                    </span>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <button 
-                                      onClick={() => fetchPayrollDetail(record.period_id)}
-                                      className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center"
-                                    >
-                                      <FontAwesomeIcon icon={faEye} className="mr-1" />
-                                      View Details
-                                    </button>
+                                  <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium">
+                                    <div className="flex flex-col sm:flex-row gap-2">
+                                      <button
+                                        onClick={() => handleApprovalAction(request.employee_id, 'approve')}
+                                        className="bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 px-2 sm:px-3 py-1 rounded-full hover:bg-green-200 dark:hover:bg-green-800 transition-colors flex items-center justify-center"
+                                      >
+                                        <FontAwesomeIcon icon={faUserCheck} className="mr-1" />
+                                        Approve
+                                      </button>
+                                      <button
+                                        onClick={() => handleApprovalAction(request.employee_id, 'reject')}
+                                        className="bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 px-2 sm:px-3 py-1 rounded-full hover:bg-red-200 dark:hover:bg-red-800 transition-colors flex items-center justify-center"
+                                      >
+                                        <FontAwesomeIcon icon={faUserTimes} className="mr-1" />
+                                        Reject
+                                      </button>
+                                    </div>
                                   </td>
                                 </tr>
                               ))}
@@ -953,174 +681,620 @@ const Dashboard = ({ userData, onLogout }) => {
                       </div>
                     </div>
                   )}
+                  {/* Add rest of allocator sections here if needed */}
+                  {/* Employee Timesheet Viewer for Allocators */}
+                 <div className="mb-6 sm:mb-8 animate-fadeIn">
+                   <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 sm:mb-4 flex items-center">
+                     <div className="p-2 rounded-md bg-teal-100 dark:bg-teal-900 text-teal-600 dark:text-teal-300 mr-3">
+                       <FontAwesomeIcon icon={faHistory} />
+                     </div>
+                     Employee Timesheets
+                   </h3>
 
-                  {/* NEW: No Payroll Data Message */}
-                  {(!payrollRecords || payrollRecords.length === 0) && (
-                    <div className="mb-6 sm:mb-8 animate-fadeIn">
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 sm:mb-4 flex items-center">
-                        <div className="p-2 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 mr-3">
-                          <FontAwesomeIcon icon={faFileInvoiceDollar} />
-                        </div>
-                        Payroll Information
-                      </h3>
-                      
-                      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 sm:p-8 text-center border border-gray-100 dark:border-gray-700">
-                        <FontAwesomeIcon icon={faReceipt} className="text-gray-300 dark:text-gray-600 text-4xl sm:text-5xl mb-4" />
-                        <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">No Payroll Records Available</h4>
-                        <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">
-                          Your salary information will appear here once your allocator processes payroll periods. 
-                          Contact your manager if you believe this is an error.
-                        </p>
-                      </div>
-                    </div>
-                  )}
+                   <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4 mb-6 border border-gray-100 dark:border-gray-700">
+                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4">
+                       <div className="col-span-1 md:col-span-2 lg:col-span-1">
+                         <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Select Employee</label>
+                         <select 
+                           className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500 text-sm"
+                           value={selectedEmployeeId || ''}
+                           onChange={(e) => {
+                             const id = e.target.value;
+                             setSelectedEmployeeId(id);
+                             if (id) {
+                               const emp = employees.find(e => e.id.toString() === id);
+                               setSelectedEmployeeName(emp ? emp.username : '');
+                               fetchEmployeeTimesheets(id, timesheetStartDate, timesheetEndDate);
+                               setAllocatorViewingEmployeeTimesheets(true);
+                             } else {
+                               setAllocatorViewingEmployeeTimesheets(false);
+                             }
+                           }}
+                         >
+                           <option value="">Select an employee</option>
+                           {employees.map(emp => (
+                             <option key={emp.id} value={emp.id}>{emp.username}</option>
+                           ))}
+                         </select>
+                       </div>
+                       <div className="col-span-1">
+                         <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">From Date</label>
+                         <input 
+                           type="date" 
+                           className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm"
+                           value={timesheetStartDate}
+                           onChange={(e) => setTimesheetStartDate(e.target.value)}
+                         />
+                       </div>
+                       <div className="col-span-1">
+                         <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">To Date</label>
+                         <input 
+                           type="date" 
+                           className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm"
+                           value={timesheetEndDate}
+                           onChange={(e) => setTimesheetEndDate(e.target.value)}
+                         />
+                       </div>
+                       <div className="col-span-1">
+                         <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 opacity-0">Action</label>
+                         <button
+                           onClick={() => {
+                             if (selectedEmployeeId) {
+                               fetchEmployeeTimesheets(selectedEmployeeId, timesheetStartDate, timesheetEndDate);
+                             } else {
+                               showNotificationMessage('Please select an employee first');
+                             }
+                           }}
+                           className="w-full p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg flex items-center justify-center text-sm"
+                         >
+                           <FontAwesomeIcon icon={faEye} className="mr-2" />
+                           View Timesheets
+                         </button>
+                       </div>
+                     </div>
 
-                  {/* EXISTING: Timesheet History Section */}
-                  <div className="mb-6 sm:mb-8 animate-fadeIn">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex flex-col sm:flex-row items-start sm:items-center">
-                      <div className="flex items-center mb-2 sm:mb-0">
-                        <div className="p-2 rounded-md bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 mr-3">
-                          <FontAwesomeIcon icon={faReceipt} />
-                        </div>
-                        <span>Timesheet History</span>
-                      </div>
-                      <div className="ml-0 sm:ml-auto w-full sm:w-auto">
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
-                          <div className="flex flex-col">
-                            <span className="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap mb-1">From:</span>
-                            <input
-                              type="date"
-                              value={timesheetStartDate}
-                              onChange={(e) => setTimesheetStartDate(e.target.value)}
-                              className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-2 py-1 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            />
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap mb-1">To:</span>
-                            <input
-                              type="date"
-                              value={timesheetEndDate}
-                              onChange={(e) => setTimesheetEndDate(e.target.value)}
-                              className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-2 py-1 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            />
-                          </div>
-                          <div className="flex space-x-1">
-                            <button
-                              onClick={handleTimesheetFilter}
-                              className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded-lg text-xs transition-colors flex items-center justify-center"
-                            >
-                              <FontAwesomeIcon icon={faCalendarAlt} className="mr-1" />
-                              <span>Filter</span>
-                            </button>
-                            <button
-                              onClick={() => {
-                                setTimesheetStartDate('');
-                                setTimesheetEndDate('');
-                                fetchTimesheetData();
-                              }}
-                              className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-lg text-xs transition-colors"
-                            >
-                              Clear
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </h3>
+                     {/* Delete timesheet section */}
+                     <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                       <h4 className="font-medium text-gray-800 dark:text-gray-100 mb-2 text-sm">Delete Old Timesheet Entries</h4>
+                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                         <div className="sm:col-span-1">
+                           <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Delete Records Before</label>
+                           <input 
+                             type="date" 
+                             className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm"
+                             value={deleteBeforeDate}
+                             onChange={(e) => setDeleteBeforeDate(e.target.value)}
+                           />
+                         </div>
+                         <div className="sm:col-span-1">
+                           <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 opacity-0">Action</label>
+                           <button
+                             onClick={() => {
+                               if (selectedEmployeeId) {
+                                 clearEmployeeTimesheets(selectedEmployeeId, deleteBeforeDate);
+                               } else {
+                                 showNotificationMessage('Please select an employee first');
+                               }
+                             }}
+                             disabled={isDeleting}
+                             className="w-full p-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg flex items-center justify-center text-sm"
+                           >
+                             {isDeleting ? (
+                               <Loader small />
+                             ) : (
+                               <>
+                                 <FontAwesomeIcon icon={faTrash} className="mr-2" />
+                                 Delete Old Records
+                               </>
+                             )}
+                           </button>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
 
-                    {/* Delete old timesheets section for employees */}
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4 mb-4 sm:mb-6 border border-gray-100 dark:border-gray-700">
-                      <h4 className="font-medium text-gray-800 dark:text-gray-100 mb-2 text-sm">Delete Old Timesheet Entries</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div className="sm:col-span-1">
-                          <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Delete Records Before</label>
-                          <input 
-                            type="date" 
-                            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm"
-                            value={deleteBeforeDate}
-                            onChange={(e) => setDeleteBeforeDate(e.target.value)}
-                          />
-                        </div>
-                        <div className="sm:col-span-1">
-                          <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 opacity-0">Action</label>
-                          <button
-                            onClick={() => deleteOwnTimesheets(deleteBeforeDate)}
-                            disabled={isDeleting}
-                            className="w-full p-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg flex items-center justify-center text-sm"
-                          >
-                            {isDeleting ? (
-                              <Loader small />
-                            ) : (
-                              <>
-                                <FontAwesomeIcon icon={faTrash} className="mr-2" />
-                                Delete Old Records
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                   {/* Display employee timesheet data with collapsible sections */}
+                   {allocatorViewingEmployeeTimesheets && (
+                     <div className="animate-fadeIn">
+                       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
+                         <h4 className="text-sm md:text-md font-medium text-gray-800 dark:text-gray-200 flex items-center mb-2 sm:mb-0">
+                           <FontAwesomeIcon icon={faUser} className="mr-2 text-indigo-500" />
+                           Timesheets for: {selectedEmployeeName}
+                         </h4>
+                         <div className="flex space-x-2">
+                           <button 
+                             onClick={() => {
+                               const newState = {};
+                               employeeTimesheetData.forEach(day => {
+                                 newState[day.date] = true;
+                               });
+                               setExpandedEmployeeDays(newState);
+                             }}
+                             className="text-xs px-2 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 rounded hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors"
+                           >
+                             Expand All
+                           </button>
+                           <button 
+                             onClick={() => {
+                               const newState = {};
+                               employeeTimesheetData.forEach(day => {
+                                 newState[day.date] = false;
+                               });
+                               setExpandedEmployeeDays(newState);
+                             }}
+                             className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                           >
+                             Collapse All
+                           </button>
+                         </div>
+                       </div>
 
-                    {/* Employee Timesheet section with collapsible days */}
-                    <div className="mb-2 flex justify-end space-x-2">
-                      <button 
-                        onClick={() => {
-                          const newState = {};
-                          timesheetData.forEach(day => {
-                            newState[day.date] = true;
-                          });
-                          setExpandedDays(newState);
-                        }}
-                        className="text-xs px-2 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 rounded hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors"
-                      >
-                        Expand All
-                      </button>
-                      <button 
-                        onClick={() => {
-                          const newState = {};
-                          timesheetData.forEach(day => {
-                            newState[day.date] = false;
-                          });
-                          setExpandedDays(newState);
-                        }}
-                        className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                      >
-                        Collapse All
-                      </button>
-                    </div>
+                       {employeeTimesheetData.length > 0 ? (
+                         <div className="space-y-4">
+                           {employeeTimesheetData.map((day) => (
+                             <TimesheetDay 
+                               key={day.date}
+                               day={day}
+                               isExpanded={expandedEmployeeDays[day.date] !== false}
+                               onToggle={toggleEmployeeDayExpanded}
+                             />
+                           ))}
+                         </div>
+                       ) : (
+                         <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 md:p-8 text-center shadow-lg">
+                           <FontAwesomeIcon icon={faReceipt} className="text-gray-300 dark:text-gray-600 text-3xl sm:text-4xl md:text-5xl mb-3" />
+                           <p className="text-sm sm:text-base md:text-lg text-gray-500 dark:text-gray-400">No timesheet data found for this employee</p>
+                         </div>
+                       )}
+                     </div>
+                   )}
+                 </div>
 
-                    {timesheetData.length > 0 ? (
-                      <div className="space-y-4">
-                        {timesheetData.map((day) => (
-                          <TimesheetDay 
-                            key={day.date}
-                            day={day}
-                            isExpanded={expandedDays[day.date] !== false} // Default to expanded
-                            onToggle={toggleDayExpanded}
-                          />
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 md:p-8 text-center shadow-lg">
-                        <FontAwesomeIcon icon={faReceipt} className="text-gray-300 dark:text-gray-600 text-3xl sm:text-4xl md:text-5xl mb-3" />
-                        <p className="text-sm sm:text-base md:text-lg text-gray-500 dark:text-gray-400">No timesheet data found for the selected period</p>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-            </>
-          ) : (
-            <div className="bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-400 dark:border-yellow-700 text-yellow-700 dark:text-yellow-300 px-4 py-3 rounded-lg shadow-md animate-pulse">
-              <div className="flex items-center">
-                <FontAwesomeIcon icon={faBell} className="mr-3 text-yellow-500" />
-                <p className="text-sm sm:text-base">No dashboard data available. Please check your connection to the server.</p>
-              </div>
-            </div>
-          )}
-        </main>
-      </div>
-    </div>
-  );
+                 <div className="mb-6 sm:mb-8 animate-fadeIn">
+                   <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 sm:mb-4 flex items-center">
+                     <div className="p-2 rounded-md bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 mr-3">
+                       <FontAwesomeIcon icon={faUserClock} />
+                     </div>
+                     Employee Work Status
+                   </h3>
+
+                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6">
+                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-5 border-t-4 border-green-500 hover:shadow-xl transition-shadow transform hover:-translate-y-1">
+                       <div className="flex items-center justify-between mb-3 sm:mb-4">
+                         <h4 className="font-semibold text-gray-700 dark:text-gray-200 text-sm sm:text-base">Currently Working</h4>
+                         <span className="px-2 sm:px-3 py-1 rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium animate-pulse">Live</span>
+                       </div>
+                       <div className="flex items-center">
+                         <div className="p-3 sm:p-4 rounded-full bg-green-100 dark:bg-green-900 text-green-500 dark:text-green-300 mr-3 sm:mr-4">
+                           <FontAwesomeIcon icon={faStopwatch} className="text-base sm:text-lg" />
+                         </div>
+                         <div>
+                           <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Active employees</p>
+                           <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100 bg-clip-text bg-gradient-to-br from-green-500 to-teal-400">
+                             {dashboardData.currently_working_employees || 0}
+                           </p>
+                           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                             out of {dashboardData.total_employees || 0} total
+                           </p>
+                         </div>
+                       </div>
+                     </div>
+
+                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-5 border-t-4 border-blue-500 hover:shadow-xl transition-shadow transform hover:-translate-y-1">
+                       <div className="flex items-center justify-between mb-3 sm:mb-4">
+                         <h4 className="font-semibold text-gray-700 dark:text-gray-200 text-sm sm:text-base">Total Work Today</h4>
+                         <span className="px-2 sm:px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium">Today</span>
+                       </div>
+                       <div className="flex items-center">
+                         <div className="p-3 sm:p-4 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-500 dark:text-blue-300 mr-3 sm:mr-4">
+                           <FontAwesomeIcon icon={faChartLine} className="text-base sm:text-lg" />
+                         </div>
+                         <div>
+                           <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Team time worked</p>
+                           <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100 bg-clip-text bg-gradient-to-br from-blue-500 to-indigo-400">
+                             {formatTimeSimple(dashboardData.total_today_minutes_worked || 0)}
+                           </p>
+                           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                             {formatTimeSimple(dashboardData.average_work_minutes_today || 0)} avg per employee
+                           </p>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+
+                 <div className="mb-6 sm:mb-8 animate-fadeIn">
+                   <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 sm:mb-4 flex items-center">
+                     <div className="p-2 rounded-md bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 mr-3">
+                       <FontAwesomeIcon icon={faTasks} />
+                     </div>
+                     Task Statistics
+                   </h3>
+
+                   <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-5 border-l-4 border-yellow-500 hover:shadow-xl transition-all transform hover:-translate-y-1">
+                       <div className="flex items-center">
+                         <div className="p-2 sm:p-3 rounded-full bg-yellow-100 dark:bg-yellow-900 text-yellow-500 dark:text-yellow-300 mr-3 sm:mr-4">
+                           <FontAwesomeIcon icon={faHourglassHalf} className="text-base sm:text-lg" />
+                         </div>
+                         <div>
+                           <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Pending Tasks</p>
+                           <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-700 dark:text-gray-100">{dashboardData.pending_tasks || 0}</p>
+                         </div>
+                       </div>
+                     </div>
+
+                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-5 border-l-4 border-blue-500 hover:shadow-xl transition-all transform hover:-translate-y-1">
+                       <div className="flex items-center">
+                         <div className="p-2 sm:p-3 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-500 dark:text-blue-300 mr-3 sm:mr-4">
+                           <FontAwesomeIcon icon={faTasks} className="text-base sm:text-lg" />
+                         </div>
+                         <div>
+                           <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Awaiting Review</p>
+                           <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-700 dark:text-gray-100">
+                             {dashboardData.completed_tasks_awaiting_review || 0}
+                           </p>
+                         </div>
+                       </div>
+                     </div>
+
+                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-5 border-l-4 border-green-500 hover:shadow-xl transition-all transform hover:-translate-y-1">
+                       <div className="flex items-center">
+                         <div className="p-2 sm:p-3 rounded-full bg-green-100 dark:bg-green-900 text-green-500 dark:text-green-300 mr-3 sm:mr-4">
+                           <FontAwesomeIcon icon={faCheckCircle} className="text-base sm:text-lg" />
+                         </div>
+                         <div>
+                           <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Approved Tasks</p>
+                           <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-700 dark:text-gray-100">{dashboardData.approved_tasks || 0}</p>
+                         </div>
+                       </div>
+                     </div>
+
+                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-5 border-l-4 border-red-500 hover:shadow-xl transition-all transform hover:-translate-y-1">
+                       <div className="flex items-center">
+                         <div className="p-2 sm:p-3 rounded-full bg-red-100 dark:bg-red-900 text-red-500 dark:text-red-300 mr-3 sm:mr-4">
+                           <FontAwesomeIcon icon={faTimesCircle} className="text-base sm:text-lg" />
+                         </div>
+                         <div>
+                           <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Rejected Tasks</p>
+                           <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-700 dark:text-gray-100">{dashboardData.rejected_tasks || 0}</p>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+               </>
+             )}
+
+             {userData.role === 'employee' && (
+               <>
+                 {/* NEW: Current Salary Information Section */}
+                 {dashboardData?.current_salary && (
+                   <div className="mb-6 sm:mb-8 animate-fadeIn">
+                     <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 sm:mb-4 flex items-center">
+                       <div className="p-2 rounded-md bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 mr-3">
+                         <FontAwesomeIcon icon={faMoneyBillWave} />
+                       </div>
+                       Current Salary Information
+                     </h3>
+                     
+                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 border border-gray-100 dark:border-gray-700">
+                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+                           <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Monthly Salary</h4>
+                           <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                             {formatCurrency(dashboardData.current_salary.monthly_salary)}
+                           </p>
+                         </div>
+                         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                           <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Currency</h4>
+                           <p className="text-xl font-semibold text-blue-600 dark:text-blue-400">
+                             {dashboardData.current_salary.currency}
+                           </p>
+                         </div>
+                         <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
+                           <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Effective From</h4>
+                           <p className="text-lg font-medium text-purple-600 dark:text-purple-400">
+                             {new Date(dashboardData.current_salary.effective_from).toLocaleDateString()}
+                           </p>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                 )}
+
+                 {/* NEW: Current Month Work Summary */}
+                 <div className="mb-6 sm:mb-8 animate-fadeIn">
+                   <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 sm:mb-4 flex items-center">
+                     <div className="p-2 rounded-md bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 mr-3">
+                       <FontAwesomeIcon icon={faCalculator} />
+                     </div>
+                     Current Month Work Summary
+                   </h3>
+                   
+                   <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 border border-gray-100 dark:border-gray-700">
+                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                       <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                         <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Today's Work</h4>
+                         <p className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                           {formatTimeSimple(dashboardData?.today_minutes_worked || 0)}
+                         </p>
+                       </div>
+                       <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                         <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">This Week</h4>
+                         <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                           {formatTimeSimple(dashboardData?.week_minutes_worked || 0)}
+                         </p>
+                       </div>
+                       <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+                         <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">This Month</h4>
+                         <p className="text-xl font-bold text-green-600 dark:text-green-400">
+                           {formatTimeSimple(dashboardData?.month_minutes_worked || 0)}
+                         </p>
+                       </div>
+                       <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
+                         <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Work Status</h4>
+                         <div className="flex items-center">
+                           <span className={`inline-block h-3 w-3 rounded-full mr-2 ${
+                             dashboardData?.is_working ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
+                           }`}></span>
+                           <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                             {dashboardData?.is_working ? 'Working' : 'Off Duty'}
+                           </p>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+
+                 {/* NEW: Payroll History Section */}
+                 {payrollRecords && payrollRecords.length > 0 && (
+                   <div className="mb-6 sm:mb-8 animate-fadeIn">
+                     <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 sm:mb-4 flex items-center">
+                       <div className="p-2 rounded-md bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 mr-3">
+                         <FontAwesomeIcon icon={faFileInvoiceDollar} />
+                       </div>
+                       Payroll History
+                     </h3>
+                     
+                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700">
+                       <div className="overflow-x-auto">
+                         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                           <thead className="bg-gray-50 dark:bg-gray-900">
+                             <tr>
+                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                 Pay Period
+                               </th>
+                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                 Hours
+                               </th>
+                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                 Gross Pay
+                               </th>
+                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                 Net Pay
+                               </th>
+                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                 Status
+                               </th>
+                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                 Action
+                               </th>
+                             </tr>
+                           </thead>
+                           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                             {payrollRecords.map((record) => (
+                               <tr key={record.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                                   {record.pay_period}
+                                 </td>
+                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                   <div>
+                                     <div>Regular: {record.regular_hours}h</div>
+                                     <div className="text-xs">Overtime: {record.overtime_hours}h</div>
+                                   </div>
+                                 </td>
+                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                   {formatCurrency(record.gross_pay)}
+                                 </td>
+                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600 dark:text-green-400">
+                                   {formatCurrency(record.net_pay)}
+                                 </td>
+                                 <td className="px-6 py-4 whitespace-nowrap">
+                                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                     record.status === 'paid' 
+                                       ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                       : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                   }`}>
+                                     {record.status}
+                                   </span>
+                                 </td>
+                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                   <button 
+                                     onClick={() => fetchPayrollDetail(record.period_id)}
+                                     className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center"
+                                   >
+                                     <FontAwesomeIcon icon={faEye} className="mr-1" />
+                                     View Details
+                                   </button>
+                                 </td>
+                               </tr>
+                             ))}
+                           </tbody>
+                         </table>
+                       </div>
+                     </div>
+                   </div>
+                 )}
+
+                 {/* NEW: No Payroll Data Message */}
+                 {/* NEW: No Payroll Data Message */}
+                 {(!payrollRecords || payrollRecords.length === 0) && (
+                   <div className="mb-6 sm:mb-8 animate-fadeIn">
+                     <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 sm:mb-4 flex items-center">
+                       <div className="p-2 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 mr-3">
+                         <FontAwesomeIcon icon={faFileInvoiceDollar} />
+                       </div>
+                       Payroll Information
+                     </h3>
+                     
+                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 sm:p-8 text-center border border-gray-100 dark:border-gray-700">
+                       <FontAwesomeIcon icon={faReceipt} className="text-gray-300 dark:text-gray-600 text-4xl sm:text-5xl mb-4" />
+                       <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">No Payroll Records Available</h4>
+                       <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">
+                         Your salary information will appear here once your allocator processes payroll periods. 
+                         Contact your manager if you believe this is an error.
+                       </p>
+                     </div>
+                   </div>
+                 )}
+
+                 {/* EXISTING: Timesheet History Section */}
+                 <div className="mb-6 sm:mb-8 animate-fadeIn">
+                   <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex flex-col sm:flex-row items-start sm:items-center">
+                     <div className="flex items-center mb-2 sm:mb-0">
+                       <div className="p-2 rounded-md bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 mr-3">
+                         <FontAwesomeIcon icon={faReceipt} />
+                       </div>
+                       <span>Timesheet History</span>
+                     </div>
+                     <div className="ml-0 sm:ml-auto w-full sm:w-auto">
+                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
+                         <div className="flex flex-col">
+                           <span className="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap mb-1">From:</span>
+                           <input
+                             type="date"
+                             value={timesheetStartDate}
+                             onChange={(e) => setTimesheetStartDate(e.target.value)}
+                             className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-2 py-1 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                           />
+                         </div>
+                         <div className="flex flex-col">
+                           <span className="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap mb-1">To:</span>
+                           <input
+                             type="date"
+                             value={timesheetEndDate}
+                             onChange={(e) => setTimesheetEndDate(e.target.value)}
+                             className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg px-2 py-1 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                           />
+                         </div>
+                         <div className="flex space-x-1">
+                           <button
+                             onClick={handleTimesheetFilter}
+                             className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded-lg text-xs transition-colors flex items-center justify-center"
+                           >
+                             <FontAwesomeIcon icon={faCalendarAlt} className="mr-1" />
+                             <span>Filter</span>
+                           </button>
+                           <button
+                             onClick={() => {
+                               setTimesheetStartDate('');
+                               setTimesheetEndDate('');
+                               fetchTimesheetData();
+                             }}
+                             className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-lg text-xs transition-colors"
+                           >
+                             Clear
+                           </button>
+                         </div>
+                       </div>
+                     </div>
+                   </h3>
+
+                   {/* Delete old timesheets section for employees */}
+                   <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4 mb-4 sm:mb-6 border border-gray-100 dark:border-gray-700">
+                     <h4 className="font-medium text-gray-800 dark:text-gray-100 mb-2 text-sm">Delete Old Timesheet Entries</h4>
+                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                       <div className="sm:col-span-1">
+                         <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Delete Records Before</label>
+                         <input 
+                           type="date" 
+                           className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm"
+                           value={deleteBeforeDate}
+                           onChange={(e) => setDeleteBeforeDate(e.target.value)}
+                         />
+                       </div>
+                       <div className="sm:col-span-1">
+                         <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 opacity-0">Action</label>
+                         <button
+                           onClick={() => deleteOwnTimesheets(deleteBeforeDate)}
+                           disabled={isDeleting}
+                           className="w-full p-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg flex items-center justify-center text-sm"
+                         >
+                           {isDeleting ? (
+                             <Loader small />
+                           ) : (
+                             <>
+                               <FontAwesomeIcon icon={faTrash} className="mr-2" />
+                               Delete Old Records
+                             </>
+                           )}
+                         </button>
+                       </div>
+                     </div>
+                   </div>
+
+                   {/* Employee Timesheet section with collapsible days */}
+                   <div className="mb-2 flex justify-end space-x-2">
+                     <button 
+                       onClick={() => {
+                         const newState = {};
+                         timesheetData.forEach(day => {
+                           newState[day.date] = true;
+                         });
+                         setExpandedDays(newState);
+                       }}
+                       className="text-xs px-2 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 rounded hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors"
+                     >
+                       Expand All
+                     </button>
+                     <button 
+                       onClick={() => {
+                         const newState = {};
+                         timesheetData.forEach(day => {
+                           newState[day.date] = false;
+                         });
+                         setExpandedDays(newState);
+                       }}
+                       className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                     >
+                       Collapse All
+                     </button>
+                   </div>
+
+                   {timesheetData.length > 0 ? (
+                     <div className="space-y-4">
+                       {timesheetData.map((day) => (
+                         <TimesheetDay 
+                           key={day.date}
+                           day={day}
+                           isExpanded={expandedDays[day.date] !== false}
+                           onToggle={toggleDayExpanded}
+                         />
+                       ))}
+                     </div>
+                   ) : (
+                     <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 md:p-8 text-center shadow-lg">
+                       <FontAwesomeIcon icon={faReceipt} className="text-gray-300 dark:text-gray-600 text-3xl sm:text-4xl md:text-5xl mb-3" />
+                       <p className="text-sm sm:text-base md:text-lg text-gray-500 dark:text-gray-400">No timesheet data found for the selected period</p>
+                     </div>
+                   )}
+                 </div>
+               </>
+             )}
+           </>
+         ) : (
+           <div className="bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-400 dark:border-yellow-700 text-yellow-700 dark:text-yellow-300 px-4 py-3 rounded-lg shadow-md animate-pulse">
+             <div className="flex items-center">
+               <FontAwesomeIcon icon={faBell} className="mr-3 text-yellow-500" />
+               <p className="text-sm sm:text-base">No dashboard data available. Please check your connection to the server.</p>
+             </div>
+           </div>
+         )}
+       </main>
+     </div>
+   </div>
+ );
 };
 
 export default Dashboard;
