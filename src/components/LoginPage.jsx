@@ -44,12 +44,17 @@ const LoginPage = ({ onLogin }) => {
     setError('');
     setApprovalPending(false);
 
+    // Validate that role is selected
+    if (!role) {
+      setError('Please select your role to continue');
+      setIsLoading(false);
+      return;
+    }
+
     const formData = new FormData();
     formData.append('username', username);
     formData.append('password', password);
-    if (role) {
-      formData.append('role', role);
-    }
+    formData.append('role', role); // Now always included since role is required
 
     try {
       const response = await fetch('https://taskapi.buildingindiadigital.com/login', {
@@ -435,8 +440,9 @@ const LoginPage = ({ onLogin }) => {
                       className="block w-full px-9 sm:px-10 py-2.5 sm:py-3 text-white bg-slate-700/50 border border-slate-600 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-500/50 focus:outline-none transition-all duration-300 hover:border-purple-400 appearance-none group-hover:bg-slate-700 text-sm sm:text-base"
                       value={role}
                       onChange={(e) => setRole(e.target.value)}
+                      required
                     >
-                      <option value="" className="bg-slate-800">Select Role (Optional)</option>
+                      <option value="" className="bg-slate-800">Select Role *</option>
                       <option value="client" className="bg-slate-800">Client</option>
                       <option value="allocator" className="bg-slate-800">Allocator</option>
                       <option value="employee" className="bg-slate-800">Employee</option>
@@ -449,7 +455,7 @@ const LoginPage = ({ onLogin }) => {
                     </div>
                   </div>
                   <p className="text-xs text-slate-400 mt-2 ml-1">
-                    Select your role to enhance security (optional)
+                    Role selection is required for login
                   </p>
                 </div>
 
