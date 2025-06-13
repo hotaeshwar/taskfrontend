@@ -171,8 +171,8 @@ const TasksPage = ({ userData, onLogout }) => {
           entries.push({
             client_name: client.name, // Use client.name instead of client directly
             week_number: week,
-            posts_count: 1,
-            reels_count: 1,
+            posts_count: 0,
+            reels_count: 0,
             story_description: "COLLAGE + WTSAP ST",
             is_topical_day: false
           });
@@ -329,8 +329,8 @@ const TasksPage = ({ userData, onLogout }) => {
               id: `temp-${client.name}-${week}`,
               client_name: client.name,
               week_number: week,
-              posts_count: 1, // Default value
-              reels_count: 1, // Default value
+              posts_count: 0, // Default value
+              reels_count: 0, // Default value
               story_description: "COLLAGE", // Default editable value
               is_topical_day: false
             });
@@ -1130,6 +1130,9 @@ const TasksPage = ({ userData, onLogout }) => {
                           </th>
                           <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Client
+                            </th>
+                           <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Assigned By
                           </th>
                           <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Due Date
@@ -1155,6 +1158,9 @@ const TasksPage = ({ userData, onLogout }) => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm text-gray-900">{task.client.name}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">{task.allocator.username}</div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm text-gray-900">
