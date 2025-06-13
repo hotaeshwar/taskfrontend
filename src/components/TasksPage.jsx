@@ -173,7 +173,7 @@ const TasksPage = ({ userData, onLogout }) => {
             week_number: week,
             posts_count: 1,
             reels_count: 1,
-            story_description: "COLLAGE + WTSAP STORY",
+            story_description: "COLLAGE + WTSAP ST",
             is_topical_day: false
           });
         }
